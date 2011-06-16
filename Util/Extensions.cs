@@ -37,17 +37,20 @@ namespace MCForge
         }
         public static byte[] GZip(this byte[] bytes)
         {
-            System.IO.MemoryStream ms = new System.IO.MemoryStream();
-            GZipStream gs = new GZipStream(ms, CompressionMode.Compress, true);
-            gs.Write(bytes, 0, bytes.Length);
-            gs.Close();
-            gs.Dispose();
-            ms.Position = 0;
-            bytes = new byte[ms.Length];
-            ms.Read(bytes, 0, (int)ms.Length);
-            ms.Close();
-            ms.Dispose();
-            return bytes;
+            byte[] gzipped;
+            using (System.IO.MemoryStream ms = new System.IO.MemoryStream())
+            {
+                using (GZipStream gs = new GZipStream(ms, CompressionMode.Compress, true))
+                {
+                    gs.Write(bytes, 0, bytes.Length);
+                    gs.Close();
+                }
+                ms.Position = 0;
+                gzipped = new byte[ms.Length];
+                ms.Read(gzipped, 0, (int)ms.Length);
+                ms.Close();
+            }
+            return gzipped;
         }
         public static string[] Slice(this string[] str, int offset)
         {

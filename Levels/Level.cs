@@ -21,6 +21,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Data;
 using System.Threading;
+using System.Text;
 //using MySql.Data.MySqlClient;
 //using MySql.Data.Types;
 
@@ -266,17 +267,17 @@ namespace MCForge
             if (blockCache.Count == 0) return;
             List<BlockPos> tempCache = blockCache;
             blockCache = new List<BlockPos>();
-            string queryString;
-            queryString = "INSERT INTO `Block" + name + "` (Username, TimePerformed, X, Y, Z, type, deleted) VALUES ";
+            StringBuilder sb = new StringBuilder();
+            sb.Append("INSERT INTO `Block" + name + "` (Username, TimePerformed, X, Y, Z, type, deleted) VALUES ");
 
             foreach (BlockPos bP in tempCache)
             {
-                queryString += "('" + bP.name + "', '" + bP.TimePerformed.ToString("yyyy-MM-dd HH:mm:ss") + "', " + (int)bP.x + ", " + (int)bP.y + ", " + (int)bP.z + ", " + bP.type + ", " + bP.deleted + "), ";
+                sb.Append("('" + bP.name + "', '" + bP.TimePerformed.ToString("yyyy-MM-dd HH:mm:ss") + "', " + (int)bP.x + ", " + (int)bP.y + ", " + (int)bP.z + ", " + bP.type + ", " + bP.deleted + "), ");
             }
+            sb.Remove(sb.Length - 2, 2);
 
-            queryString = queryString.Remove(queryString.Length - 2);
-
-            MySQL.executeQuery(queryString);
+            MySQL.executeQuery(sb.ToString());
+            sb = null;
             tempCache.Clear();
         }
 
@@ -567,70 +568,75 @@ namespace MCForge
 
                 if (changed == true || !File.Exists(path) || Override)
                 {
-                    FileStream fs = File.Create(path + ".back");
-                    GZipStream gs = new GZipStream(fs, CompressionMode.Compress);
 
-                    byte[] header = new byte[16];
-                    BitConverter.GetBytes(1874).CopyTo(header, 0);
-                    gs.Write(header, 0, 2);
-
-                    BitConverter.GetBytes(width).CopyTo(header, 0);
-                    BitConverter.GetBytes(height).CopyTo(header, 2);
-                    BitConverter.GetBytes(depth).CopyTo(header, 4);
-                    BitConverter.GetBytes(spawnx).CopyTo(header, 6);
-                    BitConverter.GetBytes(spawnz).CopyTo(header, 8);
-                    BitConverter.GetBytes(spawny).CopyTo(header, 10);
-                    header[12] = rotx; header[13] = roty;
-                    header[14] = (byte)permissionvisit;
-                    header[15] = (byte)permissionbuild;
-                    gs.Write(header, 0, header.Length);
-                    byte[] level = new byte[blocks.Length];
-                    for (int i = 0; i < blocks.Length; ++i)
+                    using (FileStream fs = File.Create(path + ".back"))
                     {
-                        if (blocks[i] < 80)
+                        using (GZipStream gs = new GZipStream(fs, CompressionMode.Compress))
                         {
-                            level[i] = blocks[i];
+                            byte[] header = new byte[16];
+                            BitConverter.GetBytes(1874).CopyTo(header, 0);
+                            gs.Write(header, 0, 2);
+
+                            BitConverter.GetBytes(width).CopyTo(header, 0);
+                            BitConverter.GetBytes(height).CopyTo(header, 2);
+                            BitConverter.GetBytes(depth).CopyTo(header, 4);
+                            BitConverter.GetBytes(spawnx).CopyTo(header, 6);
+                            BitConverter.GetBytes(spawnz).CopyTo(header, 8);
+                            BitConverter.GetBytes(spawny).CopyTo(header, 10);
+                            header[12] = rotx; header[13] = roty;
+                            header[14] = (byte)permissionvisit;
+                            header[15] = (byte)permissionbuild;
+                            gs.Write(header, 0, header.Length);
+                            byte[] level = new byte[blocks.Length];
+                            for (int i = 0; i < blocks.Length; ++i)
+                            {
+                                if (blocks[i] < 80)
+                                {
+                                    level[i] = blocks[i];
+                                }
+                                else
+                                {
+                                    level[i] = Block.SaveConvert(blocks[i]);
+                                }
+                            }
+                            gs.Write(level, 0, level.Length);
+                            gs.Close();
                         }
-                        else
-                        {
-                            level[i] = Block.SaveConvert(blocks[i]);
-                        }
-                    } gs.Write(level, 0, level.Length); gs.Close();
-                    fs.Close();
+                        fs.Close();
+                    }
 
                     File.Delete(path + ".backup");
                     File.Copy(path + ".back", path + ".backup");
                     File.Delete(path);
                     File.Move(path + ".back", path);
 
-                    StreamWriter SW = new StreamWriter(File.Create("levels/level properties/" + name + ".properties"));
-                    SW.WriteLine("#Level properties for " + name);
-                    SW.WriteLine("Theme = " + theme);
-                    SW.WriteLine("Physics = " + physics.ToString());
-                    SW.WriteLine("Physics speed = " + speedPhysics.ToString());
-                    SW.WriteLine("Physics overload = " + overload.ToString());
-                    SW.WriteLine("Finite mode = " + finite.ToString());
-                    SW.WriteLine("Animal AI = " + ai.ToString());
-                    SW.WriteLine("Edge water = " + edgeWater.ToString());
-                    SW.WriteLine("Survival death = " + Death.ToString());
-                    SW.WriteLine("Fall = " + fall.ToString());
-                    SW.WriteLine("Drown = " + drown.ToString());
-                    SW.WriteLine("MOTD = " + motd);
-                    SW.WriteLine("JailX = " + jailx.ToString());
-                    SW.WriteLine("JailY = " + jaily.ToString());
-                    SW.WriteLine("JailZ = " + jailz.ToString());
-                    SW.WriteLine("Unload = " + unload);
-                    SW.WriteLine("PerBuild = " + PermissionToName(permissionbuild));
-                    SW.WriteLine("PerVisit = " + PermissionToName(permissionvisit));
-                    SW.Flush();
-                    SW.Close();
+                    using (StreamWriter SW = new StreamWriter(File.Create("levels/level properties/" + name + ".properties")))
+                    {
+                        SW.WriteLine("#Level properties for " + name);
+                        SW.WriteLine("Theme = " + theme);
+                        SW.WriteLine("Physics = " + physics.ToString());
+                        SW.WriteLine("Physics speed = " + speedPhysics.ToString());
+                        SW.WriteLine("Physics overload = " + overload.ToString());
+                        SW.WriteLine("Finite mode = " + finite.ToString());
+                        SW.WriteLine("Animal AI = " + ai.ToString());
+                        SW.WriteLine("Edge water = " + edgeWater.ToString());
+                        SW.WriteLine("Survival death = " + Death.ToString());
+                        SW.WriteLine("Fall = " + fall.ToString());
+                        SW.WriteLine("Drown = " + drown.ToString());
+                        SW.WriteLine("MOTD = " + motd);
+                        SW.WriteLine("JailX = " + jailx.ToString());
+                        SW.WriteLine("JailY = " + jaily.ToString());
+                        SW.WriteLine("JailZ = " + jailz.ToString());
+                        SW.WriteLine("Unload = " + unload);
+                        SW.WriteLine("PerBuild = " + PermissionToName(permissionbuild));
+                        SW.WriteLine("PerVisit = " + PermissionToName(permissionvisit));
+                        SW.Flush();
+                        SW.Close();
+                    }
 
                     Server.s.Log("SAVED: Level \"" + name + "\". (" + players.Count + "/" + Player.players.Count  + "/" + Server.players + ")");
                     changed = false;
                     
-                    fs.Dispose();
-                    gs.Dispose();
-                    SW.Dispose();
                 }
                 else
                 {
@@ -703,157 +709,172 @@ namespace MCForge
             string path = "levels/" + givenName + ".lvl";
             if (File.Exists(path))
             {
-                FileStream fs = File.OpenRead(path);
-                try
+                using(FileStream fs = File.OpenRead(path))
                 {
-                    GZipStream gs = new GZipStream(fs, CompressionMode.Decompress);
-                    byte[] ver = new byte[2];
-                    gs.Read(ver, 0, ver.Length);
-                    ushort version = BitConverter.ToUInt16(ver, 0);
-                    Level level;
-                    if (version == 1874)
-                    {
-                        byte[] header = new byte[16]; gs.Read(header, 0, header.Length);
-                        ushort width = BitConverter.ToUInt16(header, 0);
-                        ushort height = BitConverter.ToUInt16(header, 2);
-                        ushort depth = BitConverter.ToUInt16(header, 4);
-                        level = new Level("temp", width, depth, height, "empty");
-                        level.spawnx = BitConverter.ToUInt16(header, 6);
-                        level.spawnz = BitConverter.ToUInt16(header, 8);
-                        level.spawny = BitConverter.ToUInt16(header, 10);
-                        level.rotx = header[12]; level.roty = header[13];
-                        //level.permissionvisit = (LevelPermission)header[14];
-                        //level.permissionbuild = (LevelPermission)header[15];
-                    }
-                    else
-                    {
-                        byte[] header = new byte[12]; gs.Read(header, 0, header.Length);
-                        ushort width = version;
-                        ushort height = BitConverter.ToUInt16(header, 0);
-                        ushort depth = BitConverter.ToUInt16(header, 2);
-                        level = new Level("temp", width, depth, height, "grass");
-                        level.spawnx = BitConverter.ToUInt16(header, 4);
-                        level.spawnz = BitConverter.ToUInt16(header, 6);
-                        level.spawny = BitConverter.ToUInt16(header, 8);
-                        level.rotx = header[10]; level.roty = header[11];
-                    }
-                    level.permissionbuild = (LevelPermission)11;
-
-                    level.name = givenName;
-                    level.setPhysics(phys);
-
-                    byte[] blocks = new byte[level.width * level.height * level.depth];
-                    gs.Read(blocks, 0, blocks.Length);
-                    level.blocks = blocks;
-                    gs.Close();
-
-                    level.backedup = true;
-
-                    DataTable ZoneDB = MySQL.fillData("SELECT * FROM `Zone" + givenName + "`");
-
-                    Zone Zn;
-                    for (int i = 0; i < ZoneDB.Rows.Count; ++i)
-                    {
-                        Zn.smallX = (ushort)ZoneDB.Rows[i]["SmallX"];
-                        Zn.smallY = (ushort)ZoneDB.Rows[i]["SmallY"];
-                        Zn.smallZ = (ushort)ZoneDB.Rows[i]["SmallZ"];
-                        Zn.bigX = (ushort)ZoneDB.Rows[i]["BigX"];
-                        Zn.bigY = (ushort)ZoneDB.Rows[i]["BigY"];
-                        Zn.bigZ = (ushort)ZoneDB.Rows[i]["BigZ"];
-                        Zn.Owner = ZoneDB.Rows[i]["Owner"].ToString();
-                        level.ZoneList.Add(Zn);
-                    }
-
-                    ZoneDB.Dispose();
-
-                    level.jailx = (ushort)(level.spawnx * 32); level.jaily = (ushort)(level.spawny * 32); level.jailz = (ushort)(level.spawnz * 32);
-                    level.jailrotx = level.rotx; level.jailroty = level.roty;
-
-                    level.physThread = new Thread(new ThreadStart(level.Physics));
-
                     try
                     {
-                        DataTable foundDB = MySQL.fillData("SELECT * FROM `Portals" + givenName + "`");
-
-                        for (int i = 0; i < foundDB.Rows.Count; ++i)
+                        Level level;
+                        using (GZipStream gs = new GZipStream(fs, CompressionMode.Decompress))
                         {
-                            if (!Block.portal(level.GetTile((ushort)foundDB.Rows[i]["EntryX"], (ushort)foundDB.Rows[i]["EntryY"], (ushort)foundDB.Rows[i]["EntryZ"])))
+                            byte[] ver = new byte[2];
+                            gs.Read(ver, 0, ver.Length);
+                            ushort version = BitConverter.ToUInt16(ver, 0);
+                            if (version == 1874)
                             {
-                                MySQL.executeQuery("DELETE FROM `Portals" + givenName + "` WHERE EntryX=" + foundDB.Rows[i]["EntryX"] + " AND EntryY=" + foundDB.Rows[i]["EntryY"] + " AND EntryZ=" + foundDB.Rows[i]["EntryZ"]);
+                                byte[] header = new byte[16]; gs.Read(header, 0, header.Length);
+                                ushort width = BitConverter.ToUInt16(header, 0);
+                                ushort height = BitConverter.ToUInt16(header, 2);
+                                ushort depth = BitConverter.ToUInt16(header, 4);
+                                level = new Level("temp", width, depth, height, "empty");
+                                level.spawnx = BitConverter.ToUInt16(header, 6);
+                                level.spawnz = BitConverter.ToUInt16(header, 8);
+                                level.spawny = BitConverter.ToUInt16(header, 10);
+                                level.rotx = header[12]; level.roty = header[13];
+                                //level.permissionvisit = (LevelPermission)header[14];
+                                //level.permissionbuild = (LevelPermission)header[15];
+                            }
+                            else
+                            {
+                                byte[] header = new byte[12]; gs.Read(header, 0, header.Length);
+                                ushort width = version;
+                                ushort height = BitConverter.ToUInt16(header, 0);
+                                ushort depth = BitConverter.ToUInt16(header, 2);
+                                level = new Level("temp", width, depth, height, "grass");
+                                level.spawnx = BitConverter.ToUInt16(header, 4);
+                                level.spawnz = BitConverter.ToUInt16(header, 6);
+                                level.spawny = BitConverter.ToUInt16(header, 8);
+                                level.rotx = header[10]; level.roty = header[11];
+                            }
+                            level.permissionbuild = (LevelPermission)11;
+
+                            level.name = givenName;
+                            level.setPhysics(phys);
+
+                            level.blocks = new byte[level.width * level.height * level.depth];
+                            gs.Read(level.blocks, 0, level.blocks.Length);
+
+                            gs.Close();
+                        }
+
+                        level.backedup = true;
+
+                        using (DataTable ZoneDB = MySQL.fillData("SELECT * FROM `Zone" + givenName + "`"))
+                        {
+                            for (int i = 0; i < ZoneDB.Rows.Count; ++i)
+                            {
+                                Zone Zn = new Zone();
+                                Zn.smallX = (ushort)ZoneDB.Rows[i]["SmallX"];
+                                Zn.smallY = (ushort)ZoneDB.Rows[i]["SmallY"];
+                                Zn.smallZ = (ushort)ZoneDB.Rows[i]["SmallZ"];
+                                Zn.bigX = (ushort)ZoneDB.Rows[i]["BigX"];
+                                Zn.bigY = (ushort)ZoneDB.Rows[i]["BigY"];
+                                Zn.bigZ = (ushort)ZoneDB.Rows[i]["BigZ"];
+                                Zn.Owner = ZoneDB.Rows[i]["Owner"].ToString();
+                                level.ZoneList.Add(Zn);
                             }
                         }
 
-                        foundDB = MySQL.fillData("SELECT * FROM `Messages" + givenName + "`");
 
-                        for (int i = 0; i < foundDB.Rows.Count; ++i)
+                        level.jailx = (ushort)(level.spawnx * 32); level.jaily = (ushort)(level.spawny * 32); level.jailz = (ushort)(level.spawnz * 32);
+                        level.jailrotx = level.rotx; level.jailroty = level.roty;
+
+                        level.physThread = new Thread(new ThreadStart(level.Physics));
+
+                        try
                         {
-                            if (!Block.mb(level.GetTile((ushort)foundDB.Rows[i]["X"], (ushort)foundDB.Rows[i]["Y"], (ushort)foundDB.Rows[i]["Z"])))
+                            using (DataTable foundDB = MySQL.fillData("SELECT * FROM `Portals" + givenName + "`"))
                             {
-                                MySQL.executeQuery("DELETE FROM `Messages" + givenName + "` WHERE X=" + foundDB.Rows[i]["X"] + " AND Y=" + foundDB.Rows[i]["Y"] + " AND Z=" + foundDB.Rows[i]["Z"]);
-                            }
-                        }
-                        foundDB.Dispose();
-                    }
-                    catch (Exception e) { Server.ErrorLog(e); }
-
-                    try
-                    {
-                        string foundLocation;
-                        foundLocation = "levels/level properties/" + level.name + ".properties";
-                        if (!File.Exists(foundLocation))
-                        {
-                            foundLocation = "levels/level properties/" + level.name;
-                        }
-
-                        foreach (string line in File.ReadAllLines(foundLocation))
-                        {
-                            try
-                            {
-                                if (line[0] != '#')
+                                for (int i = 0; i < foundDB.Rows.Count; ++i)
                                 {
-                                    string value = line.Substring(line.IndexOf(" = ") + 3);
-
-                                    switch (line.Substring(0, line.IndexOf(" = ")).ToLower())
+                                    if (!Block.portal(level.GetTile((ushort)foundDB.Rows[i]["EntryX"], (ushort)foundDB.Rows[i]["EntryY"], (ushort)foundDB.Rows[i]["EntryZ"])))
                                     {
-                                        case "theme": level.theme = value; break;
-                                        case "physics": level.setPhysics(int.Parse(value)); break;
-                                        case "physics speed": level.speedPhysics = int.Parse(value); break;
-                                        case "physics overload": level.overload = int.Parse(value); break;
-                                        case "finite mode": level.finite = bool.Parse(value); break;
-                                        case "animal ai": level.ai = bool.Parse(value); break;
-                                        case "edge water": level.edgeWater = bool.Parse(value); break;
-                                        case "survival death": level.Death = bool.Parse(value); break;
-                                        case "fall": level.fall = int.Parse(value); break;
-                                        case "drown": level.drown = int.Parse(value); break;
-                                        case "motd": level.motd = value; break;
-                                        case "jailx": level.jailx = ushort.Parse(value); break;
-                                        case "jaily": level.jaily = ushort.Parse(value); break;
-                                        case "jailz": level.jailz = ushort.Parse(value); break;
-                                        case "unload": level.unload = bool.Parse(value); break;
-
-                                        case "perbuild":
-                                            if (PermissionFromName(value) != LevelPermission.Null) level.permissionbuild = PermissionFromName(value);
-                                            break;
-                                        case "pervisit":
-                                            if (PermissionFromName(value) != LevelPermission.Null) level.permissionvisit = PermissionFromName(value);
-                                            break;
+                                        MySQL.executeQuery("DELETE FROM `Portals" + givenName + "` WHERE EntryX=" + foundDB.Rows[i]["EntryX"] + " AND EntryY=" + foundDB.Rows[i]["EntryY"] + " AND EntryZ=" + foundDB.Rows[i]["EntryZ"]);
                                     }
                                 }
                             }
-                            catch (Exception e) { Server.ErrorLog(e); }
+
+                            using (DataTable foundDB = MySQL.fillData("SELECT * FROM `Messages" + givenName + "`"))
+                            {
+                                for (int i = 0; i < foundDB.Rows.Count; ++i)
+                                {
+                                    if (!Block.mb(level.GetTile((ushort)foundDB.Rows[i]["X"], (ushort)foundDB.Rows[i]["Y"], (ushort)foundDB.Rows[i]["Z"])))
+                                    {
+                                        MySQL.executeQuery("DELETE FROM `Messages" + givenName + "` WHERE X=" + foundDB.Rows[i]["X"] + " AND Y=" + foundDB.Rows[i]["Y"] + " AND Z=" + foundDB.Rows[i]["Z"]);
+                                    }
+                                }
+                            }
                         }
-                    } catch { }
+                        catch (Exception e) { Server.ErrorLog(e); }
+
+                        try
+                        {
+                            string foundLocation;
+                            foundLocation = "levels/level properties/" + level.name + ".properties";
+                            if (!File.Exists(foundLocation))
+                            {
+                                foundLocation = "levels/level properties/" + level.name;
+                            }
+
+                            foreach (string line in File.ReadAllLines(foundLocation))
+                            {
+                                try
+                                {
+                                    if (line[0] != '#')
+                                    {
+                                        string value = line.Substring(line.IndexOf(" = ") + 3);
+
+                                        switch (line.Substring(0, line.IndexOf(" = ")).ToLower())
+                                        {
+                                            case "theme": level.theme = value; break;
+                                            case "physics": level.setPhysics(int.Parse(value)); break;
+                                            case "physics speed": level.speedPhysics = int.Parse(value); break;
+                                            case "physics overload": level.overload = int.Parse(value); break;
+                                            case "finite mode": level.finite = bool.Parse(value); break;
+                                            case "animal ai": level.ai = bool.Parse(value); break;
+                                            case "edge water": level.edgeWater = bool.Parse(value); break;
+                                            case "survival death": level.Death = bool.Parse(value); break;
+                                            case "fall": level.fall = int.Parse(value); break;
+                                            case "drown": level.drown = int.Parse(value); break;
+                                            case "motd": level.motd = value; break;
+                                            case "jailx": level.jailx = ushort.Parse(value); break;
+                                            case "jaily": level.jaily = ushort.Parse(value); break;
+                                            case "jailz": level.jailz = ushort.Parse(value); break;
+                                            case "unload": level.unload = bool.Parse(value); break;
+
+                                            case "perbuild":
+                                                if (PermissionFromName(value) != LevelPermission.Null) level.permissionbuild = PermissionFromName(value);
+                                                break;
+                                            case "pervisit":
+                                                if (PermissionFromName(value) != LevelPermission.Null) level.permissionvisit = PermissionFromName(value);
+                                                break;
+                                        }
+                                    }
+                                }
+                                catch (Exception e) { Server.ErrorLog(e); }
+                            }
+                        } catch { }
 
 
 
-                    Server.s.Log("Level \"" + level.name + "\" loaded.");
-                    level.ctfgame.mapOn = level;
-                    return level;
+                        Server.s.Log("Level \"" + level.name + "\" loaded.");
+                        level.ctfgame.mapOn = level;
+                        return level;
+                    }
+                    catch (Exception ex)
+                    {
+                        Server.ErrorLog(ex); return null;
+                    }
+                    finally
+                    {
+                        fs.Close();
+                    }
                 }
-                catch (Exception ex) { Server.ErrorLog(ex); return null; }
-                finally { fs.Close(); }
             }
-            else { Server.s.Log("ERROR loading level."); return null; }
+            else
+            {
+                Server.s.Log("ERROR loading level.");
+                return null;
+            }
         }
 
         public void ChatLevel(string message)

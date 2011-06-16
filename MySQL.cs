@@ -44,8 +44,10 @@ namespace MCForge
                     {
                         conn.ChangeDatabase(Server.MySQLDatabaseName);
                     }
-                    MySqlCommand cmd = new MySqlCommand(queryString, conn);
-                    cmd.ExecuteNonQuery();
+                    using (MySqlCommand cmd = new MySqlCommand(queryString, conn))
+                    {
+                        cmd.ExecuteNonQuery();
+                    }
                     conn.Close();
                 }
             }

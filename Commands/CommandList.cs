@@ -17,6 +17,7 @@
 */
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MCForge
 {
@@ -31,43 +32,35 @@ namespace MCForge
         }
         public List<string> commandNames()
         {
-            List<string> tempList = new List<string>();
-
-            commands.ForEach(delegate(Command cmd)
-            {
-                tempList.Add(cmd.name);
-            });
-
-            return tempList;
+            return commands.Select(c => c.name).ToList();
         }
 
         public bool Remove(Command cmd) { return commands.Remove(cmd); }
         public bool Contains(Command cmd) { return commands.Contains(cmd); }
         public bool Contains(string name)
         {
-            name = name.ToLower(); foreach (Command cmd in commands)
-            {
-                if (cmd.name == name.ToLower()) { return true; }
-            } return false;
+            string searchFor = name.ToLower();
+            return commands.Any(c => c.name == searchFor);
         }
         public Command Find(string name)
         {
-            name = name.ToLower(); foreach (Command cmd in commands)
-            {
-                if (cmd.name == name.ToLower() || cmd.shortcut == name.ToLower()) { return cmd; }
-            } return null;
+            string searchFor = name.ToLower();
+            return commands.FirstOrDefault(c => c.name == searchFor || c.shortcut == searchFor);
         }
 
         public string FindShort(string shortcut)
         {
-            if (shortcut == "") return "";
+            if (String.IsNullOrEmpty(shortcut))
+                return String.Empty;
 
-            shortcut = shortcut.ToLower();
+            string searchFor = shortcut.ToLower();
             foreach (Command cmd in commands)
             {
-                if (cmd.shortcut == shortcut) return cmd.name;
+                if (cmd.shortcut == searchFor)
+                    return cmd.name;
             }
-            return "";
+
+            return String.Empty;
         }
 
         public List<Command> All() { return new List<Command>(commands); }

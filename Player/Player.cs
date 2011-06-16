@@ -225,16 +225,14 @@ namespace MCForge
                         {
                             try
                             {
-                                List<string> welcome = new List<string>();
-                                StreamReader wm = File.OpenText("text/welcome.txt");
-                                while (!wm.EndOfStream)
-                                    welcome.Add(wm.ReadLine());
+                                using (StreamReader wm = File.OpenText("text/welcome.txt"))
+                                {
 
-                                wm.Close();
-                                wm.Dispose();
+                                    while (!wm.EndOfStream)
+                                        SendMessage(wm.ReadLine());
 
-                                foreach (string w in welcome)
-                                    SendMessage(w);
+                                    wm.Close();
+                                }
                             }
                             catch { }
                         }
@@ -259,10 +257,10 @@ namespace MCForge
                     {
                         if (!Group.Find("Nobody").commands.Contains("inbox") && !Group.Find("Nobody").commands.Contains("send"))
                         {
-                            DataTable Inbox = MySQL.fillData("SELECT * FROM `Inbox" + name + "`", true);
-
-                            SendMessage("&cYou have &f" + Inbox.Rows.Count + Server.DefaultColor + " &cmessages in /inbox");
-                            Inbox.Dispose();
+                            using (DataTable Inbox = MySQL.fillData("SELECT * FROM `Inbox" + name + "`", true))
+                            {
+                                SendMessage("&cYou have &f" + Inbox.Rows.Count + Server.DefaultColor + " &cmessages in /inbox");
+                            }
                         }
                     }
                     catch { }
@@ -505,16 +503,17 @@ namespace MCForge
                     else
                     {
                         // Verify Names is off.  Gotta check the hard way.
-                        DataTable ipQuery = MySQL.fillData("SELECT Name FROM Players WHERE IP = '" + ip + "'");
-
-                        if (ipQuery.Rows.Count > 0)
+                        using (DataTable ipQuery = MySQL.fillData("SELECT Name FROM Players WHERE IP = '" + ip + "'"))
                         {
-                            if (ipQuery.Rows.Contains(name) && Server.whiteList.Contains(name))
+
+                            if (ipQuery.Rows.Count > 0)
                             {
-                                onWhitelist = true;
+                                if (ipQuery.Rows.Contains(name) && Server.whiteList.Contains(name))
+                                {
+                                    onWhitelist = true;
+                                }
                             }
                         }
-                        ipQuery.Dispose();
                     }
                 }
 
@@ -1524,27 +1523,30 @@ namespace MCForge
                 }
                 if (this.joker)
                 {
+                    // TODO: Load this earlier
                     if (File.Exists("text/joker.txt"))
                     {
                         Server.s.Log("<JOKER>: " + this.name + ": " + text);
                         Player.GlobalMessageOps(Server.DefaultColor + "<&aJ&bO&cK&5E&9R" + Server.DefaultColor + ">: " + this.color + this.name + ":&f " + text);
                         FileInfo jokertxt = new FileInfo("text/joker.txt");
-                        StreamReader stRead = jokertxt.OpenText();
-                        List<string> lines = new List<string>();
-                        Random rnd = new Random();
-                        int i = 0;
-
-                        while (!(stRead.Peek() == -1))
-                            lines.Add(stRead.ReadLine());
-
-                        stRead.Close();
-                        stRead.Dispose();
-
-                        if (lines.Count > 0)
+                        using (StreamReader stRead = jokertxt.OpenText())
                         {
-                            i = rnd.Next(lines.Count);
-                            text = lines[i];
+                            List<string> lines = new List<string>();
+                            Random rnd = new Random();
+                            int i = 0;
+
+                            while (!(stRead.Peek() == -1))
+                                lines.Add(stRead.ReadLine());
+
+                            if (lines.Count > 0)
+                            {
+                                i = rnd.Next(lines.Count);
+                                text = lines[i];
+                            }
+
+                            stRead.Close();
                         }
+                        
                         
                     }
                     else { File.Create("text/joker.txt"); }
