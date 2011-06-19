@@ -227,12 +227,15 @@ namespace MCForge.Gui
 
                 // Update the data source and control
                 //dgvPlayers.SuspendLayout();
+                pc.Clear();
+                //dgvPlayers.DataSource = null;
 
-                pc = new PlayerCollection(new PlayerListView());
+                //pc = new PlayerCollection(new PlayerListView());
                 Player.players.ForEach(delegate(Player p) { pc.Add(p); });
 
+                dgvPlayers.DataSource = null;
                 //dgvPlayers.Invalidate();
-                dgvPlayers.DataSource = pc;
+                //dgvPlayers.DataSource = pc;
                 // Reselect player
                 if (selected != null)
                 {

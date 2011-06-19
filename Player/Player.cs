@@ -1740,8 +1740,8 @@ namespace MCForge
             int tries = 0;
         retry: try
             {
-            
-                socket.BeginSend(buffer, 0, buffer.Length, SocketFlags.None, delegate(IAsyncResult result) { }, null);
+                socket.Send(buffer, 0, buffer.Length, SocketFlags.None);
+                //socket.BeginSend(buffer, 0, buffer.Length, SocketFlags.None, delegate(IAsyncResult result) { }, null);
           /*      if (buffer[0] != 1)
                 {
                     Server.s.Log("Buffer ID: " + buffer[0]);

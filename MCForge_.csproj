@@ -89,6 +89,7 @@
     <Compile Include="Commands\CmdChangeLog.cs" />
     <Compile Include="Commands\CmdCompload.cs" />
     <Compile Include="Commands\CmdCountdown.cs" />
+    <Compile Include="Commands\CmdDebug.cs" />
     <Compile Include="Commands\CmdEconomy.cs" />
     <Compile Include="Commands\CmdEllipse.cs" />
     <Compile Include="Commands\CmdFakePay.cs" />
@@ -158,6 +159,7 @@
     <Compile Include="Commands\CmdXJail.cs" />
     <Compile Include="CountdownGame.cs" />
     <Compile Include="CTFGame.cs" />
+    <Compile Include="MySQLTransaction.cs" />
     <Compile Include="Util\ExtrasCollection.cs" />
     <Compile Include="FindReference.cs" />
     <Compile Include="Color.cs" />

@@ -66,6 +66,7 @@ namespace MCForge
 			all.Add(new CmdCountdown());
             all.Add(new CmdCTF());
             all.Add(new CmdCuboid());
+            all.Add(new CmdDebug());
             all.Add(new CmdDelete());
             all.Add(new CmdDeleteLvl());
             all.Add(new CmdDevs());

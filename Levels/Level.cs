@@ -267,17 +267,17 @@ namespace MCForge
             if (blockCache.Count == 0) return;
             List<BlockPos> tempCache = blockCache;
             blockCache = new List<BlockPos>();
-            StringBuilder sb = new StringBuilder();
-            sb.Append("INSERT INTO `Block" + name + "` (Username, TimePerformed, X, Y, Z, type, deleted) VALUES ");
+            string template = "INSERT INTO `Block" + name + "` (Username, TimePerformed, X, Y, Z, type, deleted) VALUES ('{0}', '{1}', {2}, {3}, {4}, {5}, {6})";
 
-            foreach (BlockPos bP in tempCache)
+            using (MySQLTransaction transaction = MySQLTransaction.Create(MySQL.connString))
             {
-                sb.Append("('" + bP.name + "', '" + bP.TimePerformed.ToString("yyyy-MM-dd HH:mm:ss") + "', " + (int)bP.x + ", " + (int)bP.y + ", " + (int)bP.z + ", " + bP.type + ", " + bP.deleted + "), ");
+                foreach (BlockPos bP in tempCache)
+                {
+                    transaction.Execute(String.Format(template, bP.name, bP.TimePerformed.ToString("yyyy-MM-dd HH:mm:ss"), (int)bP.x, (int)bP.y, (int)bP.z, bP.type, bP.deleted));
+                }
+                transaction.Commit();
             }
-            sb.Remove(sb.Length - 2, 2);
-
-            MySQL.executeQuery(sb.ToString());
-            sb = null;
+            
             tempCache.Clear();
         }
 
@@ -975,14 +975,13 @@ namespace MCForge
 
         public string foundInfo(ushort x, ushort y, ushort z)
         {
-            Check foundCheck = null;
             try
             {
-                foundCheck = ListCheck.Find(Check => Check.b == PosToInt(x, y, z));
-            } catch { }
-            if (foundCheck != null)
-                return foundCheck.extraInfo;
-            return "";
+                Check foundCheck = ListCheck.Find(Check => Check.b == PosToInt(x, y, z));
+                return foundCheck.extraInfo ?? String.Empty;
+            } catch {
+                return String.Empty;
+            }
         }
 
         public void CalcPhysics()
@@ -2880,7 +2879,10 @@ namespace MCForge
                         {
                             if (C2.b == b)
                             {
-                                C2.extraInfo = extraInfo;
+                                ListCheck.Remove(C2);
+                                Check c3 = C2;
+                                c3.extraInfo = extraInfo;
+                                ListCheck.Add(c3);
                                 return;
                             }
                         }
@@ -3608,11 +3610,11 @@ namespace MCForge
     }
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
-public class Check
+public struct Check
 {
     public int b;
     public byte time;
-    public string extraInfo = "";
+    public string extraInfo;
     public Check(int b, string extraInfo = "")
     {
         this.b = b;
@@ -3621,11 +3623,11 @@ public class Check
     }
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
-public class Update
+public struct Update
 {
     public int b;
     public byte type;
-    public string extraInfo = "";
+    public string extraInfo;
     public Update(int b, byte type, string extraInfo = "")
     {
         this.b = b;
