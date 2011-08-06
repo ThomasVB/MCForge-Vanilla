@@ -35,9 +35,29 @@ public class Client implements ActionListener{
 		} catch  (IOException e) {
 			System.out.println("No I/O");
 		}
-		Thread a = new Thread(new Read());
-		a.start();
-		Message("CONNECTED!");
+		if (socket != null && out != null && in != null)
+		{
+			try 
+			{
+				Thread a = new Thread(new Read());
+				a.start();
+				Message("CONNECTED!");
+				String line;
+				while ((line = in.readLine()) != null)
+				{
+					ServerMessage(line);
+					if (line.indexOf("KILL") != -1)
+						break;
+				}
+				out.close();
+				in.close();
+				socket.close();
+			}
+			catch (Exception e) { 
+				Message("ERROR!");
+				Message(e.toString());
+			}
+		}
 
 	}
 	public static void Message(String message)
@@ -68,7 +88,7 @@ public class Client implements ActionListener{
 		{
 			Message("READ FAILED!");
 		}
-		
+
 	}
 
 }
