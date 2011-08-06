@@ -16,7 +16,7 @@ namespace MCForge
 		// For thread safety
 		public AsyncCallback pfnWorkerCallBack; 
 		private System.Collections.ArrayList clients =  ArrayList.Synchronized(new System.Collections.ArrayList());
-
+		private String password = "";
 		// The following variable will keep track of the cumulative 
 		// total number of clients connected at any time. Since multiple threads
 		// can access this variable, modifying this variable should be done
@@ -44,10 +44,11 @@ namespace MCForge
 			if (!File.Exists("plugins/Remote Console/config.properties"))
 			{
 				Server.s.Log("[Remote Console] Config file not found...let me make you one!", false);
-				string[] lines = new string[2];
+				string[] lines = new string[3];
 				lines[0] = "# Remote Console Config File";
 				lines[1] = "# Please make sure to PORT FOWARD THE REMOTE PORT!";
 				lines[2] = "Remote-Port=1337";
+				lines[3] = "Password=password";
 				File.WriteAllLines("plugins/Remote Console/config.properties", lines);
 			}
 			string[] config = File.ReadAllLines("plugins/Remote Console/config.properties");
@@ -57,12 +58,19 @@ namespace MCForge
 				{
 					if (line.Split('=')[0] == "Remote-Port")
 						port = int.Parse(line.Split('=')[1]);
+					if (line.Split('=')[0] == "Password")
+						password = line.Split('=')[1];
 				}
 			}
 			if (port == Server.port)
 			{
 				ConsoleMessage("You are using the same port as the Server port", true);
 				ConsoleMessage("Using defualt 1337", true);
+			}
+			if (password == "password" && port == 1337)
+			{
+				ConsoleMessage("YOU ARE USING ALL DEFUALT SETTINGS!!", true);
+				ConsoleMessage("IT IS HIGHLY RECOMMENDED THAT YOU CHANGE THEM!", true);
 			}
 			try
 			{
@@ -178,18 +186,16 @@ namespace MCForge
 				 * Add Commands and such..
 				 */
 				System.String szData = new System.String(chars);
-				string msg = "" + socketData.m_clientNumber + ":";
-				//AppendToRichEditControl(msg + szData);
-
-				// Send back the reply to the client
-				//string replyMsg = "Server Reply:" + szData.ToUpper(); 
-				// Convert the reply to byte array
-				//byte[] byData = System.Text.Encoding.ASCII.GetBytes(replyMsg);
-
-				//Socket workerSocket = (Socket)socketData.m_currentSocket;
-				//workerSocket.Send(byData);
-	
-				// Continue the waiting for data on the Socket
+				if (szData.Split(' ')[0] == "PASSWORD")
+				{
+					if (szData.Split(' ')[1] == password)
+					{
+						clients[getIndex(socketData.id)].allow = true;
+						SendMsgToClient("Accepted", socketData.id);
+					}
+					else
+						SendMsgToClient("NO", socketData.id);
+				}
 				WaitForData(socketData.m_currentSocket, socketData.m_clientNumber );
 
 			}
@@ -295,10 +301,22 @@ namespace MCForge
 			}
 			return null;
 		}
+		public Remote_Clients getIndex(int id)
+		{
+			int i = 0;
+			foreach (Remote_Clients r in clients)
+			{
+				if (r.id == id)
+					return i;
+				i++;
+			}
+			return -1;
+		}
 	}
 	public class Remote_Clients
 	{
 		public Socket s;
+		public bool allow = false;
 		public string name;
 		public int id;
 		// Buffer to store the data sent by the client
