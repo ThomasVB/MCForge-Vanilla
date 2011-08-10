@@ -6,7 +6,7 @@
 	not use this file except in compliance with the Licenses. You may
 	obtain a copy of the Licenses at
 	
-	http://www.osedu.org/licenses/ECL-2.0
+	http://www.opensource.org/licenses/ecl2.php
 	http://www.gnu.org/licenses/gpl-3.0.html
 	
 	Unless required by applicable law or agreed to in writing,
@@ -105,6 +105,7 @@ namespace MCForge
         {
             Player.SendMessage(p, "/newlvl - creates a new level.");
             Player.SendMessage(p, "/newlvl mapname 128 64 128 type");
+            Player.SendMessage(p, "Valid sizes: 16, 32, 64, 128, 256, 512, 1024");
             Player.SendMessage(p, "Valid types: island, mountains, forest, ocean, flat, pixel, desert, space");
         }
 

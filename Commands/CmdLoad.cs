@@ -6,7 +6,7 @@
 	not use this file except in compliance with the Licenses. You may
 	obtain a copy of the Licenses at
 	
-	http://www.osedu.org/licenses/ECL-2.0
+	http://www.opensource.org/licenses/ecl2.php
 	http://www.gnu.org/licenses/gpl-3.0.html
 	
 	Unless required by applicable law or agreed to in writing,
@@ -82,6 +82,11 @@ namespace MCForge
                 {
                     if (File.Exists("levels/" + message + ".lvl.backup"))
                     {
+                        if (File.Exists("Levels/" + message + ".lvl"))
+                        {
+                            Server.s.Log("Level file is corrupt. Deleting and replacing with lvl.backup file.");
+                            File.Delete("Levels/" + message + ".lvl");
+                        }
                         Server.s.Log("Attempting to load backup.");
                         File.Copy("levels/" + message + ".lvl.backup", "levels/" + message + ".lvl", true);
                         level = Level.Load(message);

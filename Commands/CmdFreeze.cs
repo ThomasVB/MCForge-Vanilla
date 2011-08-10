@@ -6,7 +6,7 @@
 	not use this file except in compliance with the Licenses. You may
 	obtain a copy of the Licenses at
 	
-	http://www.osedu.org/licenses/ECL-2.0
+	http://www.opensource.org/licenses/ecl2.php
 	http://www.gnu.org/licenses/gpl-3.0.html
 	
 	Unless required by applicable law or agreed to in writing,
@@ -34,16 +34,34 @@ namespace MCForge
             if (message == "") { Help(p); return; }
             Player who = Player.Find(message);
             if (who == null) { Player.SendMessage(p, "Could not find player."); return; }
-            else if (who == p) { Player.SendMessage(p, "Cannot freeze yourself."); return; }
-            else if (who.group.Permission >= p.group.Permission) { Player.SendMessage(p, "Cannot freeze someone of equal or greater rank."); return; }
-
+            if (p != null)
+            {
+                if (who == p)
+                {
+                    Player.SendMessage(p, "Cannot freeze yourself.");
+                    return;
+                }
+                if (who.group.Permission >= p.group.Permission)
+                {
+                    Player.SendMessage(p, "Cannot freeze someone of equal or greater rank.");
+                    return;
+                }
+            }
             if (!who.frozen)
             {
+                if (p == null)
+                {
+                    Player.SendMessage(p, who.name + " has been frozen.");
+                }
                 who.frozen = true;
                 Player.GlobalChat(null, who.color + who.name + Server.DefaultColor + " has been &bfrozen.", false);
             }
             else
             {
+                if (p == null)
+                {
+                    Player.SendMessage(p, who.name + " has been defrosted.");
+                }
                 who.frozen = false;
                 Player.GlobalChat(null, who.color + who.name + Server.DefaultColor + " has been &adefrosted.", false);
             }

@@ -6,7 +6,7 @@
 	not use this file except in compliance with the Licenses. You may
 	obtain a copy of the Licenses at
 	
-	http://www.osedu.org/licenses/ECL-2.0
+	http://www.opensource.org/licenses/ecl2.php
 	http://www.gnu.org/licenses/gpl-3.0.html
 	
 	Unless required by applicable law or agreed to in writing,
@@ -28,7 +28,7 @@ namespace MCForge
 {
     static class MySQL
     {
-        private static string connString = "Data Source=" + Server.MySQLHost + ";Port=" + Server.MySQLPort + ";User ID=" + Server.MySQLUsername + ";Password=" + Server.MySQLPassword + ";Pooling=" + Server.MySQLPooling;
+        internal static string connString = "Data Source=" + Server.MySQLHost + ";Port=" + Server.MySQLPort + ";User ID=" + Server.MySQLUsername + ";Password=" + Server.MySQLPassword + ";Pooling=" + Server.MySQLPooling;
 
         public static void executeQuery(string queryString, bool createDB = false)
         {
@@ -56,7 +56,7 @@ namespace MCForge
                     totalCount++;
                     if (totalCount > 10)
                     {
-                        File.WriteAllText("MySQL_error.log", queryString);
+                        File.WriteAllText("MySQL_error.log", DateTime.Now + " " + queryString);
                         Server.ErrorLog(e);
                     }
                     else
@@ -97,7 +97,7 @@ namespace MCForge
                 {
                     if (!skipError)
                     {
-                        File.WriteAllText("MySQL_error.log", queryString);
+                        File.WriteAllText("MySQL_error.log", DateTime.Now + " " + queryString);
                         Server.ErrorLog(e);
                     }
                 }

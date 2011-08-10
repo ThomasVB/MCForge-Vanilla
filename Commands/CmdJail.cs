@@ -6,7 +6,7 @@
 	not use this file except in compliance with the Licenses. You may
 	obtain a copy of the Licenses at
 	
-	http://www.osedu.org/licenses/ECL-2.0
+	http://www.opensource.org/licenses/ecl2.php
 	http://www.gnu.org/licenses/gpl-3.0.html
 	
 	Unless required by applicable law or agreed to in writing,
@@ -48,10 +48,18 @@ namespace MCForge
                         Player.GlobalDie(who, false);
                         Player.GlobalSpawn(who, p.level.jailx, p.level.jaily, p.level.jailz, p.level.jailrotx, p.level.jailroty, true);
                         who.jailed = true;
+                        if (p == null)
+                        {
+                            Player.SendMessage(p, who.name + " was jailed.");
+                        }
                         Player.GlobalChat(null, who.color + who.name + Server.DefaultColor + " was &8jailed", false);
                     }
                     else
                     {
+                        if (p == null)
+                        {
+                            Player.SendMessage(p, who.name + " was freed from jail.");
+                        }
                         who.jailed = false;
                         Player.GlobalChat(null, who.color + who.name + Server.DefaultColor + " was &afreed" + Server.DefaultColor + " from jail", false);
                     }
@@ -62,6 +70,7 @@ namespace MCForge
                 }
             }
         }
+
         public override void Help(Player p)
         {
             Player.SendMessage(p, "/jail [user] - Places [user] in jail unable to use commands.");

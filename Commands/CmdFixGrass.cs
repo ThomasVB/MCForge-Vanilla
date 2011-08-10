@@ -7,7 +7,7 @@
 	not use this file except in compliance with the Licenses. You may
 	obtain a copy of the Licenses at
 	
-	http://www.osedu.org/licenses/ECL-2.0
+	http://www.opensource.org/licenses/ecl2.php
 	http://www.gnu.org/licenses/gpl-3.0.html
 	
 	Unless required by applicable law or agreed to in writing,
@@ -24,7 +24,7 @@ namespace MCForge
     public class CmdFixGrass : Command
     {
         public override string name { get { return "fixgrass"; } }
-        public override string shortcut { get { return ""; } }
+        public override string shortcut { get { return "fg"; } }
         public override string type { get { return "moderation"; } }
         public override bool museumUsable { get { return false; } }
         public override LevelPermission defaultRank { get { return LevelPermission.Admin; } }
@@ -90,12 +90,13 @@ namespace MCForge
                             {
                                 for (int iL = 1; iL < (p.level.depth - y); iL++)
                                 {
-                                    if (Block.LightPass(p.level.blocks[p.level.IntOffset(i, 0, iL, 0)]))
+                                    // Used to change grass to dirt only if all the upper blocks weren't Lightpass.
+                                    if (!Block.LightPass(p.level.blocks[p.level.IntOffset(i, 0, iL, 0)]))
                                     {
                                         skipMe = true; break;
                                     }
                                 }
-                                if (!skipMe)
+                                if (skipMe)
                                 {
                                     p.level.Blockchange(p, x, y, z, Block.dirt);
                                     totalFixed++;

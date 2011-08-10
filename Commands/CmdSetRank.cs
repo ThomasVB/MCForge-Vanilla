@@ -6,7 +6,7 @@
 	not use this file except in compliance with the Licenses. You may
 	obtain a copy of the Licenses at
 	
-	http://www.osedu.org/licenses/ECL-2.0
+	http://www.opensource.org/licenses/ecl2.php
 	http://www.gnu.org/licenses/gpl-3.0.html
 	
 	Unless required by applicable law or agreed to in writing,
@@ -30,18 +30,20 @@ namespace MCForge
 
         public override void Use(Player p, string message)
         {
-            if (message.Split(' ').Length < 2) { Help(p); return; }
-            Player who = Player.Find(message.Split(' ')[0]);
-            Group newRank = Group.Find(message.Split(' ')[1]);
-            string msgGave;
+            var split = message.Split(' ');
+            if (split.Length < 2) { Help(p); return; }
+            Player who = Player.Find(split[0]);
+            Group newRank = Group.Find(split[1]);
+            string msgGave = "";
 
             if (message.Split(' ').Length > 2) msgGave = message.Substring(message.IndexOf(' ', message.IndexOf(' ') + 1)); else msgGave = "Congratulations!";
+
             if (newRank == null) { Player.SendMessage(p, "Could not find specified rank."); return; }
 
             Group bannedGroup = Group.findPerm(LevelPermission.Banned);
             if (who == null)
             {
-                string foundName = message.Split(' ')[0];
+                string foundName = split[0];
                 if (Group.findPlayerGroup(foundName) == bannedGroup || newRank == bannedGroup)
                 {
                     Player.SendMessage(p, "Cannot change the rank to or from \"" + bannedGroup.name + "\".");
@@ -93,10 +95,13 @@ namespace MCForge
 
                 Player.GlobalChat(who, who.color + who.name + Server.DefaultColor + "'s rank was set to " + newRank.color + newRank.name, false);
                 Player.GlobalChat(null, "&6" + msgGave, false);
+
                 who.group = newRank;
                 who.color = who.group.color;
                 Player.GlobalDie(who, false);
+
                 who.SendMessage("You are now ranked " + newRank.color + newRank.name + Server.DefaultColor + ", type /help for your new set of commands.");
+                
                 Player.GlobalSpawn(who, who.pos[0], who.pos[1], who.pos[2], who.rot[0], who.rot[1], false);
             }
         }

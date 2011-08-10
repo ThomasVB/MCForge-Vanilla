@@ -6,7 +6,7 @@
 	not use this file except in compliance with the Licenses. You may
 	obtain a copy of the Licenses at
 	
-	http://www.osedu.org/licenses/ECL-2.0
+	http://www.opensource.org/licenses/ecl2.php
 	http://www.gnu.org/licenses/gpl-3.0.html
 	
 	Unless required by applicable law or agreed to in writing,
@@ -148,7 +148,7 @@ namespace MCForge_.Gui
             }
             catch (Exception e) { Server.ErrorLog(e); return; }
         }
-
+        /*
         public static void handleComm(string s)
         {
             string sentCmd = "", sentMsg = "";
@@ -185,10 +185,66 @@ namespace MCForge_.Gui
                 handleComm(Console.ReadLine());
                 return;
             }
+        
 
         talk: handleComm("say " + Server.DefaultColor + "Console [&a" + Server.ZallState + Server.DefaultColor + "]: &f" + s);
             handleComm(Console.ReadLine());
-        }
+        }*/
+        public static void handleComm(string s)
+        {
+            string sentCmd = "", sentMsg = "";
+
+            //blank lines are considered accidental
+            if (s == "") 
+            {
+                handleComm(Console.ReadLine());
+                return;
+            }
+
+            //commands all start with a slash
+            if (s.IndexOf('/') == 0)
+            {
+                //remove the preceding slash
+                s = s.Remove(0, 1);
+
+                //continue parsing
+                if (s.IndexOf(' ') != -1)
+                {
+                    sentCmd = s.Split(' ')[0];
+                    sentMsg = s.Substring(s.IndexOf(' ') + 1);
+                }
+                else if (s != "")
+                {
+                    sentCmd = s;
+                }
+            }
+            //anything else is treated as chat
+            else
+            {
+                sentCmd = "say";
+                sentMsg = Server.DefaultColor + "Console [&a" + Server.ZallState + Server.DefaultColor + "]: &f" + s;
+            }
+
+            try
+            {
+                Command cmd = Command.all.Find(sentCmd);
+                if (cmd != null)
+                {
+                    cmd.Use(null, sentMsg);
+                    Console.WriteLine("CONSOLE: USED /" + sentCmd + " " + sentMsg);
+                    handleComm(Console.ReadLine());
+                    return;
+                }
+            }
+            catch (Exception e)
+            {
+                Server.ErrorLog(e);
+                Console.WriteLine("CONSOLE: Failed command.");
+                handleComm(Console.ReadLine());
+                return;
+            }
+        } 
+
 
         public static bool CurrentUpdate = false;
         static bool msgOpen = false;
@@ -254,12 +310,15 @@ namespace MCForge_.Gui
                         {
                             if (!msgOpen && !usingConsole)
                             {
-                                msgOpen = true;
-                                if (MessageBox.Show("New version found. Would you like to update?", "Update?", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                                if (Server.checkUpdates == true)
                                 {
-                                    PerformUpdate(false);
+                                    msgOpen = true;
+                                    if (MessageBox.Show("New version found. Would you like to update?", "Update?", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                                    {
+                                        PerformUpdate(false);
+                                    }
+                                    msgOpen = false;
                                 }
-                                msgOpen = false;
                             }
                             else
                             {
@@ -435,8 +494,12 @@ namespace MCForge_.Gui
                 if (Server.listen != null) Server.listen.Close();
                 if (!Server.mono || fullRestart)
                 {
-                    Application.Restart();
-                    Server.process.Kill();
+                    Process Restarter = new Process();
+
+                    Restarter.StartInfo.FileName = "Restarter.exe";
+                    Restarter.StartInfo.Arguments = "Program.cs";
+
+                    Restarter.Start();
                 }
                 else
                 {

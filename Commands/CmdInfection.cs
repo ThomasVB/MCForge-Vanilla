@@ -1,17 +1,20 @@
 ﻿/*
-Copyright 2011 MCForge
-Coded by GamezGalaxy (hypereddie10)
-Dual-licensed under the Educational Community License, Version 2.0 and
-the GNU General Public License, Version 3 (the "Licenses"); you may
-not use this file except in compliance with the Licenses. You may
-obtain a copy of the Licenses at
-http://www.osedu.org/licenses/ECL-2.0
-http://www.gnu.org/licenses/gpl-3.0.html
-Unless required by applicable law or agreed to in writing,
-software distributed under the Licenses are distributed on an "AS IS"
-BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-or implied. See the Licenses for the specific language governing
-permissions and limitations under the Licenses.
+	Copyright 2011 MCForge
+	
+	Coded by GamezGalaxy (hypereddie10)
+		
+	Licensed under the
+	Educational Community License, Version 2.0 (the "License"); you may
+	not use this file except in compliance with the License. You may
+	obtain a copy of the License at
+	
+	http://www.osedu.org/licenses/ECL-2.0
+	
+	Unless required by applicable law or agreed to in writing,
+	software distributed under the License is distributed on an "AS IS"
+	BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+	or implied. See the License for the specific language governing
+	permissions and limitations under the License.
 */
 using System;
 using System.Threading;
@@ -24,6 +27,7 @@ namespace MCForge
     {
         #region Declaring
         //Command stuff...
+        public static List<Player> People = new List<Player>();
         public override string name { get { return "infection"; } }
         public override string shortcut { get { return ""; } }
         public override string type { get { return "build"; } }
@@ -40,8 +44,6 @@ namespace MCForge
         Random random = new Random();
         //WHOS INFECTED :D
         public static List<Player> infect = new List<Player>();
-        //Who isn't
-        public static List<Player> People = new List<Player>();
         //Game name??
         public string gamename = "";
         //WHATS THE GAME PLAYING ON ?!?!?!
@@ -50,17 +52,12 @@ namespace MCForge
         public static int minute;
         public static int seconds;
         public static string time1;
-        // Extra fields:
-        private static string _oldtitle = "CmdInfection_oldtitle";
-        private static string _oldname = "CmdInfection_oldname";
-        private static string _lives = "CmdInfection_lives";
-        private static string _creeper = "CmdInfection_Creeper";
         #endregion
         #region command
         public override void Use(Player p, string message)
         {
-            if (message.ToLower() == "stop") { Player.SendMessage(p, "Stopping infection..."); Infect.Enabled = false; timer.Enabled = false; END(); }
-            if (message.ToLower() == "time") { Player.SendMessage(p, "There is " + time11 + " left in this round!"); return; }
+			if (message.ToLower() == "stop") { Player.SendMessage(p, "Stopping infection..."); Infect.Enabled = false; timer.Enabled = false; END(); return; }
+			else if (message.ToLower() == "time") { Player.SendMessage(p, time1); return; }
             Player.SendMessage(p, "Starting Infection...");
             //Picks a random game
             if (random.Next(5) == 3)
@@ -75,7 +72,6 @@ namespace MCForge
             }
             minute = random.Next(5, 11);
             seconds = 60;
-            //Start the timer
             timer.Elapsed += new ElapsedEventHandler(TIMERCORE);
             timer.Enabled = true;
             INFECTEDLEVEL = p.level;
@@ -86,7 +82,7 @@ namespace MCForge
                 if (player.level == p.level)
                 {
                     People.Add(player);
-                    player.Extras.PutString(_oldtitle, player.title);
+                    player.oldtitle = player.title;
                     player.title = "Playing";
                     //player.SendPos(0xff, 3682, 4179, 3303, player.rot[0], 0);
                 }
@@ -113,15 +109,14 @@ namespace MCForge
             //declaring stuff...
             int firstinfect = random.Next(People.Count);
             //pick someone
-            Player infectedPlayer = People[firstinfect];
-            Player.GlobalMessage("%4" + infectedPlayer.name + " is infected RUN AWAY!!!");
-            infectedPlayer.Extras.PutString(_oldname, infectedPlayer.name);
-            Player.GlobalDie(infectedPlayer, true);
-            infectedPlayer.name = "zombie";
+            Player.GlobalMessage("%4" + People[firstinfect].name + " is infected RUN AWAY!!!");
+            People[firstinfect].oldname = People[firstinfect].name;
+            Player.GlobalDie(People[firstinfect], true);
+            People[firstinfect].name = "zombie";
             Thread.Sleep(5);
-            Player.GlobalSpawn(infectedPlayer, infectedPlayer.pos[0], infectedPlayer.pos[1], infectedPlayer.pos[2], infectedPlayer.rot[0], infectedPlayer.rot[1], false);
-            infect.Add(infectedPlayer);
-            People.Remove(infectedPlayer);
+            Player.GlobalSpawn(People[firstinfect], People[firstinfect].pos[0], People[firstinfect].pos[1], People[firstinfect].pos[2], People[firstinfect].rot[0], People[firstinfect].rot[1], false);
+            infect.Add(People[firstinfect]);
+            People.Remove(People[firstinfect]);
             Thread.Sleep(500);
             //Start the infection timer
             Infect.Elapsed += new ElapsedEventHandler(INFECTCORE);
@@ -134,11 +129,8 @@ namespace MCForge
             seconds--;
             if (minute <= 0 && seconds <= 0) { Infect.Enabled = false; END(); return; }
             else if (seconds <= 0) { seconds = 60; minute--; Player.GlobalMessage("There is " + minute + ":" + seconds + " left in the infection game"); }
-            time1 = "" + minute + ":" + seconds;
-        }
-        public static void SaveInfo()
-        {
-            Server.Time = "%2There is " + time1 + " minutes remaining in this round";
+            if (seconds >= 10) time1 = "" + minute + ":" + seconds;
+            else time1 = minute + ":0" + seconds;
         }
         #endregion
         #region INFECTCORE
@@ -170,24 +162,22 @@ namespace MCForge
                             player1.level.MakeExplosion((ushort)(player1.pos[0] / 32), (ushort)(player1.pos[1] / 32), (ushort)(player1.pos[2] / 32), 1);
                         }
                         //Send message
-                        Player.GlobalMessage(player2.color + player2.name + " %2WAS EATED BY " + player1.color + player1.Extras.GetString(_oldname));
+                        Player.GlobalMessage(player2.color + player2.name + " %2WAS EATED BY " + player1.color + player1.oldname);
                         //Give some advice
                         Player.SendMessage(player2, "&fYou can kill human " + name + " by placing tnt blocks.");
                         //Take away his lives
-                        int p2lives = player2.Extras.GetInt(_lives, 10);
-                        p2lives--;
-                        player2.Extras.PutInt(_lives, p2lives);
+                        player2.lives--;
                         //Spawn
                         Command.all.Find("spawn").Use(player2, "");
                         //Alert of him of how many lives he has left
-                        Player.SendMessage(player2, "%2You have " + p2lives + " live(s) left!");
+                        Player.SendMessage(player2, "%2You have " + player2.lives + " live(s) left!");
                         //O NOES HES DEAD
-                        if (p2lives == 0)
+                        if (player2.lives == 0)
                         {
                             //Tell the public
                             Player.GlobalMessage("%4" + player2.name + " is infected!!");
                             //Save his name
-                            player2.Extras.PutString(_oldname, player2.name);
+                            player2.oldname = player2.name;
                             //KILL HIM
                             Player.GlobalDie(player2, true);
                             //Give him a new name
@@ -201,7 +191,7 @@ namespace MCForge
                             //Ok lets make him invincible
                             player2.invincible = true;
                             //And let the server know hes infected (Just because it says creeper doesnt mean it means he's a creeper >.>)
-                            player2.Extras.PutBoolean(_creeper, true);
+                            player2.Creeper = true;
                         }
                     }
                     //IS THIS PERSON ON NO TEAM!?!?!?!
@@ -209,7 +199,7 @@ namespace MCForge
                     {
                         //Lets put him on the good team
                         People.Add(player2);
-                        player2.Extras.PutString(_oldtitle, player2.title);
+                        player2.oldtitle = player2.title;
                         player2.title = "Playing";
                     }
                 });
@@ -218,23 +208,19 @@ namespace MCForge
             //**Might not be needed**
             Player.players.ForEach(delegate(Player tester)
             {
-                if (tester.Extras.GetInt("CmdInfection_lives", 10) <= 0 && tester.name != name)
+                if (tester.lives <= 0 && tester.name != name)
                 {
                     People.Remove(tester);
                     Player.GlobalMessage("%4" + tester.name + " is infected!!");
-                    tester.Extras.PutString(_oldname, tester.name);
+                    tester.oldname = tester.name;
                     Player.GlobalDie(tester, true);
                     tester.name = name;
-
                     Thread.Sleep(5);
-
                     Player.GlobalSpawn(tester, tester.pos[0], tester.pos[1], tester.pos[2], tester.rot[0], tester.rot[1], false);
                     infect.Add(tester);
                     tester.invincible = true;
-
                     Thread.Sleep(500);
-
-                    tester.Extras.PutBoolean(_creeper, true);
+                    tester.Creeper = true;
                 }
             });
             //IS EVERYONE DEAD?!?!
@@ -246,16 +232,17 @@ namespace MCForge
         }
         #endregion
         #region END
-        public static void END()
-        {
+        public static void END() {
             //yay the game is over
             Player.GlobalMessage("The infection game ended!");
             //Who won??
             Player.GlobalMessage("The winners are");
             Player.players.ForEach(delegate(Player p)
             {
-                if (p.title == "Playing")
-                    Player.GlobalMessage(p.color + p.Extras.GetString(_oldname));
+                if (p.title == "Playing" && (p.name != "zombie" || p.name != "creeper"))
+                    Player.GlobalMessage(p.color + p.name);
+				if (p.name == "zombie" || p.name == "creeper")
+					p.name = p.oldname;
                 Thread.Sleep(500);
             });
             //ok lets reset everything...
@@ -263,27 +250,21 @@ namespace MCForge
             seconds = 0;
             timer.Enabled = false;
             Infect.Enabled = false;
+            timer.Dispose();
+            Infect.Dispose();
             Theybecreepen = false;
-            infect.ForEach(delegate(Player p) { PlayerReset(p, true); });
-            infect.Clear();
-            People.ForEach(delegate(Player p) { PlayerReset(p, false); });
-            People.Clear();
+				
         }
         #endregion
-        private static void PlayerReset(Player player1, bool resetname)
-        {
-            if (resetname)
-                player1.name = player1.Extras.GetString(_oldname, player1.name);
-            player1.title = player1.Extras.GetString(_oldtitle, player1.title);
-            player1.Extras.PutBoolean(_creeper, false);
-            player1.Extras.PutInt(_lives, 10);
-        }
         #region TNT EXPLODE
         public static void Death(Player killer, Player zombie, ushort x, ushort y, ushort z)
         {
-            Player.GlobalMessage(killer.color + killer.name + Server.DefaultColor + " EXPLODED " + zombie.color + zombie.Extras.GetString(_oldname));
+            killer.invincible = true;
+            Player.GlobalMessage(killer.color + killer.name + Server.DefaultColor + " EXPLODED " + zombie.color + zombie.oldname);
             Command.all.Find("spawn").Use(zombie, "");
             killer.level.MakeExplosion(x, y, z, 1);
+            Thread.Sleep(200);
+            killer.invincible = false;
         }
         #endregion
         #region help

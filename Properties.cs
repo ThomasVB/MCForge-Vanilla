@@ -6,7 +6,7 @@
 	not use this file except in compliance with the Licenses. You may
 	obtain a copy of the Licenses at
 	
-	http://www.osedu.org/licenses/ECL-2.0
+	http://www.opensource.org/licenses/ecl2.php
 	http://www.gnu.org/licenses/gpl-3.0.html
 	
 	Unless required by applicable law or agreed to in writing,
@@ -265,6 +265,18 @@ namespace MCForge
                                 }
                                 catch { Server.s.Log("Invalid " + key + ".  Using default."); break; }
                                 break;
+                            case "adminchat-perm":
+                                try
+                                {
+                                    sbyte parsed = sbyte.Parse(value);
+                                    if (parsed < -50 || parsed > 120)
+                                    {
+                                        throw new FormatException();
+                                    }
+                                    Server.adminchatperm = (LevelPermission)parsed;
+                                }
+                                catch { Server.s.Log("Invalid " + key + ".  Using default."); break; }
+                                break;
                             case "log-heartbeat":
                                 try { Server.logbeat = bool.Parse(value); }
                                 catch { Server.s.Log("Invalid " + key + ".  Using default."); break; }
@@ -347,6 +359,17 @@ namespace MCForge
                             case "use-whitelist":
                                 Server.useWhitelist = (value.ToLower() == "true") ? true : false;
                                 break;
+                            case "allow-tp-to-higher-ranks":
+                                Server.higherranktp = (value.ToLower() == "true") ? true : false;
+                                break;
+                            case "agree-to-rules-on-entry":
+                                try { Server.agreetorulesonentry = bool.Parse(value); }
+                                catch { Server.s.Log("Invalid " + key + ". Using default"); }
+                                break;
+                            case "admins-join-silent":
+                                try { Server.adminsjoinsilent = bool.Parse(value); }
+                                catch { Server.s.Log("Invalid " + key + ". Using default"); }
+                                break;                                
                             case "main-name":
                                 if (Player.ValidName(value)) Server.level = value;
                                 else Server.s.Log("Invalid main name");
@@ -437,6 +460,9 @@ namespace MCForge
                     w.WriteLine("#   force-cuboid\t=\tRun cuboid until the limit is hit, instead of canceling the whole operation.  Default false.");
                     w.WriteLine("#   profanity-filter\t=\tFilter bad words from the chat.  Default false.");
                     w.WriteLine("#   notify-on-join-leave\t=\tShow a balloon popup in tray notification area when a player joins/leaves the server.  Default false.");
+                    w.WriteLine("#   allow-tp-to-higher-ranks\t=\tAllows the teleportation to players of higher ranks");
+                    w.WriteLine("#   agree-to-rules-on-entry\t=\tForces all new players to the server to agree to the rules before they can build or use commands.");
+                    w.WriteLine("#   adminchat-perm\t=\tThe rank required to view adminchat. Default rank is superop.");
                     w.WriteLine();
                     w.WriteLine("#   Host\t=\tThe host name for the database (usually 127.0.0.1)");
                     w.WriteLine("#   SQLPort\t=\tPort number to be used for MySQL.  Unless you manually changed the port, leave this alone.  Default 3306.");
@@ -453,6 +479,7 @@ namespace MCForge
 					w.WriteLine();
 					w.WriteLine("#   kick-on-hackrank\t=\tSet to true if hackrank should kick players");
 					w.WriteLine("#   hackrank-kick-time\t=\tNumber of seconds until player is kicked");
+                    w.WriteLine("#   custom-rank-welcome-messages\t=\tDecides if different welcome messages for each rank is enabled. Default true.");
                     w.WriteLine();
                     w.WriteLine();
                     w.WriteLine("# Server options");
@@ -497,12 +524,15 @@ namespace MCForge
                     w.WriteLine("use-whitelist = " + Server.useWhitelist.ToString().ToLower());
                     w.WriteLine("money-name = " + Server.moneys);
                     w.WriteLine("opchat-perm = " + ((sbyte)Server.opchatperm).ToString());
+                    w.WriteLine("adminchat-perm = " + ((sbyte)Server.adminchatperm).ToString());
                     w.WriteLine("log-heartbeat = " + Server.logbeat.ToString());
                     w.WriteLine("force-cuboid = " + Server.forceCuboid.ToString());
                     w.WriteLine("profanity-filter = " + Server.profanityFilter.ToString());
                     w.WriteLine("notify-on-join-leave = " + Server.notifyOnJoinLeave.ToString());
                     w.WriteLine("repeat-messages = " + Server.repeatMessage.ToString());
                     w.WriteLine("host-state = " + Server.ZallState.ToString());
+                    w.WriteLine("agree-to-rules-on-entry = " + Server.agreetorulesonentry.ToString().ToLower());
+                    w.WriteLine("admins-join-silent = " + Server.adminsjoinsilent.ToString().ToLower());
                     w.WriteLine();
                     w.WriteLine("# backup options");
                     w.WriteLine("backup-time = " + Server.backupInterval.ToString());
@@ -532,6 +562,7 @@ namespace MCForge
                     w.WriteLine("custom-ban-message = " + Server.customBanMessage);
                     w.WriteLine("custom-shutdown = " + Server.customShutdown.ToString().ToLower());
                     w.WriteLine("custom-shutdown-message = " + Server.customShutdownMessage);
+                    w.WriteLine("allow-tp-to-higher-ranks = " + Server.higherranktp.ToString().ToLower());
                     w.WriteLine();
                     w.WriteLine("cheapmessage = " + Server.cheapMessage.ToString().ToLower());
                     w.WriteLine("cheap-message-given = " + Server.cheapMessageGiven);

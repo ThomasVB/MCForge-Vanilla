@@ -1,8 +1,71 @@
-Pending Changes
+v4.9.0.0
+- Fixed a bug in /pyramid
+- Fixed Restart-on-error
+- Fixed an issue where sometimes saving levels would randomly crash the server
+- Added a feature that checks if the Meeby.SmartIrc4Net.dll file exists. If it does not, the server will download it.
+- Modified the CLI Interface. It is now smoother and now you must put a "/" infront of commands in the CLI. 
+- Adminchat Symbol is now "+". 
+- /freeze now works in the console. 
+
+v4.8.0.0
+- Added custom login and logout messages - customizable in the console properties
+- Added /loginmessage [Player] [Message] and /logoutmessage [Player] [Message]
+- Added /explode - For all your exploding needs:
+	-/explode me - Explodes yourself
+	-/explode [Player] - Explodes the specified player
+	-/explode [X] [Y] [Z] - Explodes at the specified co-ordinates
+- Added /pyramid - Builds pyramids, thanks to aaron1tasker:
+	-/pyramid - Builds a solid pyramid
+	-/pyramid hollow - Builds a hollow pyramid
+	-/pyramid reverse - Builds a reverse pyramid
+- Added add-on /hide check - Checks if your hiding
+- Added /tnt allow and /tnt disallow to disable and enable the use of tnt commands
+- Fixed /restart and the console restart button
+- Fixed /overseer - Now accepts players names with upper-case letters, with the creation of maps
+- Fixed /unbanip - It will now unban ips with no more, "Not a valid ip!" messages :)
+- Fixed: Changelog now displays in the console.
+- Updated: /reload - Better version that takes you to the map immediately, sends reload message and logs.
+- Added /chatroom and a full chatroom system
+- Fixed some bugs in /countdown
+- Added 2 new game speeds (ultimate and extreme) to /countdown
+- Added a new game mode to /countdown: freeze (do '/countdown start [speed] freeze' to start it) 
+- Fixed a bug in /megaboid that lets you build/delete on a map that has a higher perbuild than your rank.
+- Added a feature to /xban that allows you to kick a person with a message.
+- Added the shortcut /h to /main, also fixed the help message for /main and put it in the "other" /help catagory.
+- Added the shortcut /fg to /fixgrass. 
+- Added /uban (uban is basically xban without the ipban.)
+- Removed useless code that used up to 90% RAM for no good reason
+- Updated some GUI code so Player and map lists update quicker and they now don't leak memory
+- Updated some of the MySQL code to prevent memory loss and make transactions to the databse quicker
+- Added /allowguns - allows guns on certain maps
+- Added /agree - new guests have to agree to the rules
+- Added option in the properties to allow or disallow players to teleport to people with higher ranks
+- Added /slap <map> - slaps everyone of a lower rank than you in a map
+- Added /p2p - teleports a player to another player
+- Added adminchat - chat with admins (customisable rank via properties), use ';' pre-message to send it to adminchat
+- Changed /Newlvl - Shows valid mapsizes on the help
+- Admins can join silently
+- Fixed /perbuild and /pervistit
+- Added an auto checker and downloader for Restarter.exe and Restarter.pdb
+
+v4.7.0.0
+- Added new game: Countdown
+-Added /splace - Measures a set [distance] and places a stone block at each end. Made by Woldoc, originally named /set.
+-Added /chain - Inspired by the StormCom command of the same name, /chain sends a "chain" of brown mushrooms. Upon coming into contact with a block other than air or a level's side wall, it will pull that block back to the start of the chain. 
+- Added color code information to /help.
 - Fixed issue where Player.cs doesn't check for all private network IPs starting with 172 (GitHub issue #2)
+- Hopefully fixed issue where certain color codes could sometimes crash the client (GitHub issue #21)
 - Updater should no longer crash when updating (Github issue #3)
 - /zz no longer shows an error when using "/zz blockname" (Github issue #7)
 - Player, Level, and Server now use an ExtrasCollection member named "Extras" to help manage extra data needed by custom commands
+- Custom $ replacements are now possible via file text/custom$s.txt
+- Fixed /fixgrass light not converting shaded grass to dirt.
+- Fixed an issue in CmdLoad.cs where it would constantly get stuck on corrupted levels
+- Removed unused files from the source code repository
+- Increased MCForge heartbeat delay to reduce website load
+- Removed buggy block permissions from block.properties (flagbase and odoor_airs)
+- Fixed an issue with /title where you could use a color code to title yourself [Dev].
+- Removed the omni-bans
 
 v4.6.0.1
 - Command thread will no longer be manually aborted, as this can sometimes cause problems closing the socket.

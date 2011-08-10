@@ -6,7 +6,7 @@
 	not use this file except in compliance with the Licenses. You may
 	obtain a copy of the Licenses at
 	
-	http://www.osedu.org/licenses/ECL-2.0
+	http://www.opensource.org/licenses/ecl2.php
 	http://www.gnu.org/licenses/gpl-3.0.html
 	
 	Unless required by applicable law or agreed to in writing,
@@ -30,6 +30,10 @@ namespace MCForge
         public abstract LevelPermission defaultRank { get; }
         public abstract void Use(Player p, string message);
         public abstract void Help(Player p);
+        public bool isIntervalized;
+        public int intervalInMinutes;
+        public DateTime nextExecution;
+        public Player intervalUsingPlayer;
 
         public static CommandList all = new CommandList();
         public static CommandList core = new CommandList();
@@ -37,7 +41,10 @@ namespace MCForge
         {
             all.Add(new CmdAbort());
             all.Add(new CmdAbout());
+            all.Add(new CmdAdminChat());
+            all.Add(new CmdAllowGuns());
             all.Add(new CmdAfk());
+            all.Add(new CmdAgree());
             all.Add(new CmdBan());
             all.Add(new CmdBanip());
             all.Add(new CmdBind());
@@ -50,7 +57,9 @@ namespace MCForge
             all.Add(new CmdBotSet());
             all.Add(new CmdBotSummon());
             all.Add(new CmdCalculate());
+			all.Add(new CmdChain());
             all.Add(new CmdChangeLog());
+            all.Add(new CmdChatRoom());
             all.Add(new CmdClearBlockChanges());
             all.Add(new CmdClick());
             all.Add(new CmdClones());
@@ -63,11 +72,13 @@ namespace MCForge
             all.Add(new CmdCompLoad());
             all.Add(new CmdColor());
             all.Add(new CmdCopy());
+			all.Add(new CmdCountdown());
             all.Add(new CmdCTF());
             all.Add(new CmdCuboid());
             all.Add(new CmdDelete());
             all.Add(new CmdDeleteLvl());
             all.Add(new CmdDevs());
+            all.Add(new CmdDisagree());
             all.Add(new CmdDrop());
             all.Add(new CmdEconomy());
             all.Add(new CmdEconomyBuyColor());
@@ -78,6 +89,7 @@ namespace MCForge
             all.Add(new CmdEconomyStats());
 			all.Add(new CmdEllipse());
             all.Add(new CmdEmote());
+            all.Add(new CmdExplode());
 			all.Add(new CmdFakePay());
             all.Add(new CmdFakeRank());
             all.Add(new CmdFetch());
@@ -105,7 +117,6 @@ namespace MCForge
             all.Add(new CmdImport());
             all.Add(new CmdImageprint());
             all.Add(new CmdInbox());
-            all.Add(new CmdInfection());
             all.Add(new CmdInfo());
             all.Add(new CmdInvincible());
             all.Add(new CmdJail());
@@ -120,6 +131,8 @@ namespace MCForge
             all.Add(new CmdLine());
             all.Add(new CmdLoad());
             all.Add(new CmdLockdown());
+            all.Add(new CmdLoginMessage());
+            all.Add(new CmdLogoutMessage());
             all.Add(new CmdLowlag());
             all.Add(new CmdMain());
             all.Add(new CmdMap());
@@ -144,6 +157,7 @@ namespace MCForge
             all.Add(new CmdOutline());
             all.Add(new CmdOverseer());
             all.Add(new CmdOZone());
+            all.Add(new CmdP2P());
             all.Add(new CmdPaint());
             all.Add(new CmdPaste());
             all.Add(new CmdPause());
@@ -157,6 +171,7 @@ namespace MCForge
             all.Add(new CmdPlayers());
             all.Add(new CmdPortal());
             all.Add(new CmdPossess());
+            all.Add(new CmdPyramid());
 			all.Add(new CmdRagequit());
             all.Add(new CmdRainbow());
             all.Add(new CmdRedo());
@@ -187,10 +202,12 @@ namespace MCForge
             all.Add(new CmdSetRank());
             all.Add(new CmdSetspawn());
             all.Add(new CmdShutdown());
+            all.Add(new CmdSilentCuboid());
             all.Add(new CmdSlap());
             all.Add(new CmdSpawn());
             all.Add(new CmdSpheroid());
             all.Add(new CmdSpin());
+            all.Add(new CmdSPlace());
             all.Add(new CmdStairs());
             all.Add(new CmdStatic());
             all.Add(new CmdStore());
@@ -208,6 +225,7 @@ namespace MCForge
             all.Add(new CmdTpZone());
             all.Add(new CmdTree());
             all.Add(new CmdTrust());
+            all.Add(new CmdUBan());
             all.Add(new CmdUnban());
             all.Add(new CmdUnbanip());
             all.Add(new CmdUndo());

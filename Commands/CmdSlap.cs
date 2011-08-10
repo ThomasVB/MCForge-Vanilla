@@ -6,7 +6,7 @@
 	not use this file except in compliance with the Licenses. You may
 	obtain a copy of the Licenses at
 	
-	http://www.osedu.org/licenses/ECL-2.0
+	http://www.opensource.org/licenses/ecl2.php
 	http://www.gnu.org/licenses/gpl-3.0.html
 	
 	Unless required by applicable law or agreed to in writing,
@@ -36,9 +36,26 @@ namespace MCForge
 
             if (who == null)
             {
-                Player.SendMessage(p, "Could not find player specified");
-                return;
+                Level which = Level.Find(message);
+
+                if (which == null)
+                {
+                    Player.SendMessage(p, "Could not find player or map specified");
+                    return;
+                }
+                else
+                {
+                    foreach (Player pl in Player.players)
+                    {
+                        if (pl.level == which && pl.group.Permission < p.group.Permission)
+                        {
+                               Command.all.Find("slap").Use(p, pl.name);
+                        }
+                    }
+                    return;
+                }
             }
+
             if (p == null)
             {
                 Player.SendMessage(p, "Cannot slap from the console");
@@ -77,6 +94,7 @@ namespace MCForge
         public override void Help(Player p)
         {
             Player.SendMessage(p, "/slap <name> - Slaps <name>, knocking them into the air");
+            Player.SendMessage(p, "/slap <level> - Slaps all players on <level> that are a lower rank than you, knocking them into the air");
         }
     }
 }
