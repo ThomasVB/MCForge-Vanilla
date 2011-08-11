@@ -17,6 +17,7 @@ import java.util.Scanner;
 
 
 public class Client extends Applet implements ActionListener, KeyListener {
+	public static Client main = new Client();
 	public boolean startup;
 	public boolean status;
 	public String password;
@@ -26,30 +27,39 @@ public class Client extends Applet implements ActionListener, KeyListener {
 	List chat;
 	Button start_server;
 	Button shutdown;
-	Label Chat;
+	Label Status;
 	Label Command;
 	static Socket socket = null;
 	static PrintWriter out = null;
 	static BufferedReader in = null;
 	static boolean accepted = false;
+	public Client() { }
 	public void init()
 	{
+		this.setLayout(null);
 		this.start_server = new Button("Start Server");
 		this.command = new TextField(15);
 		this.shutdown = new Button("Shutdown Server");
 		//this.Chat = new Label("Live Chat");
 		this.Command = new Label("Enter a server/client command");
+		this.Status = new Label("Server Status: Standby..");
 		this.chat = new List();
 		this.start_server.setEnabled(false);
 		this.shutdown.setEnabled(false);
 		//this.chat.setEnabled(false);
+		this.start_server.setBounds(0, 0, 120, 25);
+		this.shutdown.setBounds(122, 0, 120, 25);
+		this.chat.setBounds(0, 30, 242, 150);
+		this.Command.setBounds(20, 200, 200, 10);
+		this.command.setBounds(20, 225, 200, 10);
+		this.Status.setBounds(0, 300, 200, 10);
 		this.add(start_server);
 		this.add(shutdown);
+		this.add(chat);
 		this.add(Command);
 		this.add(command);
-		//this.add(Chat);
-		this.add(chat);
-		this.chat.setBounds(command.getX(), command.getY() - 10, 200, 200);
+		this.add(Status);
+		this.setSize(245, 320);
 		this.chat.add("LIVE CHAT");
 		this.chat.add("Please type in the password for your server");
 		this.chat.add("In the command box in hit enter");
@@ -61,11 +71,11 @@ public class Client extends Applet implements ActionListener, KeyListener {
 	}
 	public static void Message(String message)
 	{
-		
+		main.chat.add(message);
 	}
 	public static void ServerMessage(String message)
 	{
-		System.out.print("SERVER: " + message + "\n");
+		main.chat.add("SERVER: " + message);
 	}
 	public static void Sleep(int seconds)
 	{
@@ -79,9 +89,9 @@ public class Client extends Applet implements ActionListener, KeyListener {
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		if (arg0.getSource() == start_server && !status)
-		{
 			out.print("START");
-		}
+		else if (arg0.getSource() == shutdown && status)
+			out.print("SHUTDOWN");
 		
 	}
 	@Override
@@ -116,8 +126,8 @@ public class Client extends Applet implements ActionListener, KeyListener {
 				{
 					try 
 					{
-						Thread a = new Thread(new Read());
-						a.start();
+						//Thread a = new Thread(new Read());
+						//a.start();
 						Message("CONNECTED!");
 						String line;
 						while ((line = in.readLine()) != null)
@@ -126,11 +136,21 @@ public class Client extends Applet implements ActionListener, KeyListener {
 							if (line.indexOf("STAY_UP") != -1)
 								out.println("OK");
 							else if (line.indexOf("UP") != -1)
+							{
 								status = true;
+								this.Status.setText("Server Status: ONLINE");
+							}
 							else if (line.indexOf("DOWN") != -1)
+							{
 								status = false;
+								this.Status.setText("Server Status: OFFLINE");
+							}
 							else if (line.indexOf("Accepted") != -1)
 								accepted = true;
+							else if (line.indexOf("Server_Chat:") != -1)
+								Message(line);
+							else if (line.indexOf("NO") != -1)
+								System.exit(0);
 							if (line.indexOf("KILL") != -1)
 								break;
 							if (status)
@@ -156,6 +176,8 @@ public class Client extends Applet implements ActionListener, KeyListener {
 				}
 				ServerMessage("DONE!");
 			}
+			else
+				out.print(command.getText());
 		}
 		
 	}

@@ -104,7 +104,7 @@ namespace MCForge
 				SendToAll("STAY_UP!");
 			};
 			Player.PlayerChat += delegate(Player from, string message) {
-				SendToAll("SERVER_CHAT " + from.prefix + from.name + ": " + message);
+				SendToAll("Server_Chat: " + from.prefix + from.name + ": " + message);
 				return false;
 			};
 			Player.PlayerConnect += delegate(Player p) {
@@ -224,6 +224,17 @@ namespace MCForge
 						SendMsgToClient("shutdown_fail", socketData.id);
 					}
 				}
+				if (szData.IndexOf("START") != -1 && clients[getIndex(socketData.id)].allow)
+				{
+					ConsoleMessage("Starting up..", false);
+					try
+					{
+						Starting();
+					}
+					catch { 
+					Command.all.Find("restart").Use(null, "");
+					}
+				}
 				WaitForData(socketData.m_currentSocket, socketData.m_clientNumber );
 
 			}
@@ -309,7 +320,7 @@ namespace MCForge
 					r = clients[i];
 					if (r.s != null)
 					{
-						if (r.s.Connected)
+						if (r.s.Connected && r.allow)
 							r.s.Send(byData);
 					}
 				}
@@ -365,11 +376,6 @@ namespace MCForge
 
 			Socket workerSocket = (Socket)m_workerSocketList[clientNumber - 1];
 			workerSocket.Send(byData);
-		}
-
-		private void btnClear_Click(object sender, System.EventArgs e)
-		{
-			richTextBoxReceivedMsg.Clear();
 		}
 		public Remote_Clients getclient(int id)
 		{
