@@ -12,11 +12,14 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Scanner;
 
 
 
 public class Client extends Applet implements ActionListener, KeyListener {
+	/**
+	 * sure..
+	 */
+	private static final long serialVersionUID = 1L;
 	public static Client main = new Client();
 	public boolean startup;
 	public boolean status;
