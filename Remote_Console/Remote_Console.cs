@@ -17,6 +17,7 @@ namespace MCForge
 		public AsyncCallback pfnWorkerCallBack; 
 		private System.Collections.ArrayList clients =  ArrayList.Synchronized(new System.Collections.ArrayList());
 		private String password = "";
+		private System.Timers.Timer keepalive = new System.Timers.Timer(900);
 		// The following variable will keep track of the cumulative 
 		// total number of clients connected at any time. Since multiple threads
 		// can access this variable, modifying this variable should be done
@@ -38,6 +39,14 @@ namespace MCForge
 		}
 		public override void Load (bool startup)
 		{
+			ConsoleMessage("Checking for updates...");
+			System.Net.WebClient client = new WebClient();
+			client.DownloadFile("www.mcforge.net/Remote_ver.txt", "plugins/temp.txt");
+			if (File.ReadAllLines("plugins/temp.txt")[0] != "1.0")
+			{
+				ConsoleMessage("Update Found!");
+				ConsoleMessage("Please make sure to update at " + website);
+			}
 			Server.s.Log("[Remote Console] Loading Config Files..", false);
 			if (!Directory.Exists("plugins/Remote Console"))
 				Directory.CreateDirectory("plugins/Remote Console");
@@ -91,9 +100,16 @@ namespace MCForge
 				ConsoleMessage("Could not bind port", true);
 				ConsoleMessage("Is something else using it?", false);
 			}
+			keepalive.Elapsed += delegate {
+				SendToAll("STAY_UP!");
+			};
 			Player.PlayerChat += delegate(Player from, string message) {
 				SendToAll("SERVER_CHAT " + from.prefix + from.name + ": " + message);
 				return false;
+			};
+			Player.PlayerConnect += delegate(Player p) {
+				if (Server.shuttingDown)
+					p.Kick("Server is Offline");
 			};
 			
 		}
@@ -196,6 +212,18 @@ namespace MCForge
 					else
 						SendMsgToClient("NO", socketData.id);
 				}
+				if (szData.IndexOf("SHUTDOWN") != -1 && clients[getIndex(socketData.id)].allow)
+				{
+					ConsoleMessage("Shutting down...", false);
+					try
+					{
+						ShutDown();
+					}
+					catch { 
+						ConsoleMessage("SHUTDOWN FAILED", true);
+						SendMsgToClient("shutdown_fail", socketData.id);
+					}
+				}
 				WaitForData(socketData.m_currentSocket, socketData.m_clientNumber );
 
 			}
@@ -218,6 +246,57 @@ namespace MCForge
 					ConsoleMessage("Error, please check the error log for more info!", true);
 				}
 			}
+		}
+		public void Starting()
+		{
+			ConsoleMessage("Starting Server..");
+			//Plugin.Load();
+			Server.shuttingDown = false;
+			Heart.MCForgeBeatTimer.Start();
+			Heart.MinecraftBeatTimer.Start();
+			Server.Setup();
+		}
+		public void ShutDown()
+		{
+			ConsoleMessage("Stopping Server..", false);
+			List<string> players = new List<string>();
+            foreach (Player p in Player.players) { p.save(); players.Add(p.name); }
+            foreach (string p in players)
+            {
+                if (!Server.customShutdown)
+                {
+                    Player.Find(p).Kick("Server shutdown. Rejoin in 10 seconds.");
+                }
+                else
+                {
+                    Player.Find(p).Kick(Server.customShutdownMessage);
+                }
+            }
+
+            //Player.players.ForEach(delegate(Player p) { p.Kick("Server shutdown. Rejoin in 10 seconds."); });
+            Player.connections.ForEach(
+            delegate(Player p)
+            {
+                if (!Server.customShutdown)
+                {
+                    p.Kick("Server shutdown. Rejoin in 10 seconds.");
+                }
+                else
+                {
+                    p.Kick(Server.customShutdownMessage);
+                }
+            }
+            );
+            //Plugin.Unload();
+            shuttingDown = true;
+            if (listen != null)
+            {
+                listen.Close();
+            }
+			Heart.MCForgeBeatTimer.Stop();
+			Heart.MinecraftBeatTimer.Stop();
+			Server.s.Log("!!Server is being held by the plugin " + name + "!!");
+			ConsoleMessage("Server Held", false);
 		}
 		public void SendToAll(string message)
 		{

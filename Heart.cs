@@ -45,8 +45,8 @@ namespace MCForge
         static Random MCForgeBeatSeed = new Random(Process.GetCurrentProcess().Id);
         static StreamWriter beatlogger;
 
-        static System.Timers.Timer MinecraftBeatTimer = new System.Timers.Timer(500);
-        static System.Timers.Timer MCForgeBeatTimer;
+        public static System.Timers.Timer MinecraftBeatTimer = new System.Timers.Timer(500);
+        public static System.Timers.Timer MCForgeBeatTimer;
 
         static object Lock = new object();
 
