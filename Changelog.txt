@@ -10,6 +10,7 @@ v5.2.0.0
 - Fixed commands in the CLI, a slash is once again recognized :D
 - Fixed in-game messages from the console so they have proper coloring again
 - Fixed the player and map lists in the GUI not updating
+- Fixed color code exploits which crash clients
 - Completey remade the IRC bot, it now uses a different DLL (no more virus alert :D)
 - /resetbot no longer nukes the server console
 - Made it so autoload.txt doesn't save when load on /goto is enabled
@@ -17,6 +18,7 @@ v5.2.0.0
 - Made a change to the window title, it looks much more professional
 - Improved the tree generator, the trunk now makes more sense
 - Improved water/lava physics, they now have random flow. You can go back to the old physics with /map randomflow
+- Added tree growing! Use /map growtrees to turn it on, place a sapling and wait a while
 - Added leaf decay! Use /map leafdecay to turn it on, requires physics
 - Added missing stuff to the "Maps" tab
 - Added seed option to /newlvl, check /help newlvl for more information
