@@ -78,7 +78,8 @@ namespace MCForge
 
         //Custom blocks
         public const byte flagbase = (byte)70;
-
+        public const byte snow = (byte)74;
+        public const byte fallsnow = (byte)75;
         public const byte door_cobblestone = (byte)80;
         public const byte door_cobblestone_air = (byte)81;
         public const byte door_red = (byte)84;
@@ -1198,7 +1199,8 @@ namespace MCForge
                 case tdoor11: return "tdoor_air";
                 case tdoor12: return "tdoor_water";
                 case tdoor13: return "tdoor_lava";
-
+                case snow: return "snow";
+                case fallsnow: return "fallsnow";
                 case odoor1: return "odoor_wood";
                 case odoor2: return "odoor_obsidian";
                 case odoor3: return "odoor_glass";
@@ -1368,6 +1370,8 @@ namespace MCForge
                 case "blue": return 28;
                 case "blueviolet": return 29;
                 case "indigo": return 30;
+                case "snow": return snow;
+                case "fallsnow": return fallsnow;
                 case "purple": return 31;
                 case "magenta": return 32;
                 case "pink": return 33;

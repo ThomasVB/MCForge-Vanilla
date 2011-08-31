@@ -66,7 +66,7 @@ public static event OnServerError ServerError = null;
         public static int speedPhysics = 250;
 
         public static string Version { get { return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString(); } }
-
+        public static bool useseasons = true;
         // URL hash for connecting to the server
         public static string Hash = String.Empty;
         

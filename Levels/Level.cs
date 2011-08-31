@@ -145,7 +145,7 @@ namespace MCForge
 
         public bool changed = false;
         public bool backedup = false;
-
+        public SeasonsCore season;
         //Countdown
         public bool countdowninprogress = false;
 
@@ -256,7 +256,8 @@ namespace MCForge
             Server.levels.Remove(this);
             GC.Collect();
             GC.WaitForPendingFinalizers();
-
+            if (Server.useseasons && season.started)
+                season.Stop(this);
             if(!silent) Player.GlobalMessageOps("&3" + name + Server.DefaultColor + " was unloaded.");
             Server.s.Log(name + " was unloaded.");
             return true;
@@ -615,6 +616,8 @@ namespace MCForge
 
         public void Save(Boolean Override = false)
         {
+            if (Server.useseasons && season.started)
+                season.Stop(this);
             string path = "levels/" + name + ".lvl";
             if (LevelSave != null)
             {
@@ -690,13 +693,16 @@ namespace MCForge
                 Server.ErrorLog(e);
                 return;
             }
-
+            if (Server.useseasons && season.started)
+                season.Start(this);
             GC.Collect();
             GC.WaitForPendingFinalizers();
         }
 
         public int Backup(bool Forced = false, string backupName = "")
         {
+            if (Server.useseasons && season.started)
+                season.Stop(this);
             if (!backedup || Forced)
             {
                 int backupNumber = 1; string backupPath = @Server.backupLocation;
@@ -721,18 +727,24 @@ namespace MCForge
                 {
                     File.Copy(current, BackPath, true);
                     backedup = true;
+                    if (Server.useseasons)
+                        season.Start(this);
                     return backupNumber;
                 }
                 catch (Exception e)
                 {
                     Server.ErrorLog(e);
                     Server.s.Log("FAILED TO INCREMENTAL BACKUP :" + name);
+                    if (Server.useseasons)
+                        season.Start(this);
                     return -1;
                 }
             }
             else
             {
                 Server.s.Log("Level unchanged, skipping backup");
+                if (Server.useseasons)
+                    season.Start(this);
                 return -1;
             }
         }
@@ -816,7 +828,7 @@ namespace MCForge
 						gs.Read(blocks, 0, blocks.Length);
 						level.blocks = blocks;
 						gs.Close();
-
+                        level.season = new SeasonsCore(level);
 						level.backedup = true;
 
 						DataTable ZoneDB = MySQL.fillData("SELECT * FROM `Zone" + givenName + "`");

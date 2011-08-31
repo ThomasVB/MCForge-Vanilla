@@ -215,6 +215,8 @@
     <Compile Include="Plugins\Config.cs" />
     <Compile Include="Plugins\Plugin_Manager.cs" />
     <Compile Include="ScriptingVB.cs" />
+    <Compile Include="Season\Season.cs" />
+    <Compile Include="Season\Seasons_Engine.cs" />
     <Compile Include="Util\ExtrasCollection.cs" />
     <Compile Include="FindReference.cs" />
     <Compile Include="Color.cs" />
