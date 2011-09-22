@@ -410,7 +410,6 @@
     <Compile Include="Queue\Enums.cs" />
     <Compile Include="Queue\ICacheable.cs" />
     <Compile Include="Queue\MainLoop.cs" />
-    <Compile Include="Queue\TorrentException.cs" />
     <Compile Include="Scripting.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="ServerSettings.cs" />
