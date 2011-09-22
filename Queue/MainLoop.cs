@@ -244,7 +244,7 @@ namespace MonoTorrent.Client
             t.WaitHandle.WaitOne();
 
             if (t.StoredException != null)
-                throw new TorrentException("Exception in mainloop", t.StoredException);
+                throw new ApplicationException("Exception in mainloop", t.StoredException);
         }
     }
 }
