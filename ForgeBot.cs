@@ -95,16 +95,8 @@ namespace MCForge
                     }
                     for (char ch = 'a'; ch <= 'f'; ch++)
                     {
-                        if (ch == 'f')
-                        {
-                            sb.Replace("%" + ch, ColorSignal + c.MCtoIRC("&" + 0));
-                            sb.Replace("&" + ch, ColorSignal + c.MCtoIRC("&" + 0));
-                        }
-                        else
-                        {
                             sb.Replace("%" + ch, ColorSignal + c.MCtoIRC("&" + ch));
-                            sb.Replace("&" + ch, ColorSignal + c.MCtoIRC("&" + ch));
-                        }
+                            sb.Replace("&" + ch, ColorSignal + c.MCtoIRC("&" + ch));                        
                     }
                 }
                 
