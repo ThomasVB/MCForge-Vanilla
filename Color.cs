@@ -38,6 +38,8 @@ namespace MCForge
         public const string yellow = "&e";
         public const string white = "&f";
 
+	public const string irc = "&z"; //shows up as white ingame, black in irc
+
         public static string Parse(string str)
         {
             switch (str.ToLower())
@@ -81,6 +83,7 @@ namespace MCForge
                 case pink: return "pink";
                 case yellow: return "yellow";
                 case white: return "white";
+                case irc: return "white";
                 default: return "";
             }
         }
@@ -104,7 +107,8 @@ namespace MCForge
                 case red: return 4;
                 case pink: return 13;
                 case yellow: return 8;
-                case white: return 1;
+                case white: return 0;
+                case irc: return 1;
                 default: return 1;
             }
         }
