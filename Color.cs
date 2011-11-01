@@ -104,8 +104,8 @@ namespace MCForge
                 case red: return 4;
                 case pink: return 13;
                 case yellow: return 8;
-                case white: return 0;
-                default: return 0;
+                case white: return 1;
+                default: return 1;
             }
         }
         public static string IRCtoMC(byte str)
