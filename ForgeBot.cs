@@ -97,7 +97,9 @@ namespace MCForge
                     {
                             sb.Replace("%" + ch, ColorSignal + c.MCtoIRC("&" + ch));
                             sb.Replace("&" + ch, ColorSignal + c.MCtoIRC("&" + ch));                        
-                    }
+                    } 
+		    //to make sure the 'custom color' gets parsed
+                    sb.Replace("&z", ColorSignal + c.MCtoIRC("&z"));
                 }
                 
                 connection.Sender.PublicMessage(opchat ? opchannel : channel, sb.ToString());
@@ -253,7 +255,7 @@ namespace MCForge
         void Player_PlayerChat(Player p, string message)
         {
             if (Server.irc && IsConnected())
-                Say(p.color + p.prefix + p.name + ": &f" + message, p.opchat);
+                Say(p.color + p.prefix + p.name + ": &z" + message, p.opchat);
         }
         public void Connect()
         {
