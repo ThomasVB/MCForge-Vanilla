@@ -180,7 +180,10 @@ namespace MCForge
         {
             //string allowedchars = "1234567890-=qwertyuiop[]\\asdfghjkl;'zxcvbnm,./!@#$%^*()_+QWERTYUIOPASDFGHJKL:\"ZXCVBNM<>? ";
             // Allowed chars are any ASCII char between 20h/32 and 7Ah/122 inclusive, except for 26h/38 (&) and 60h/96 (`)
-
+		
+		//for messages from irc
+		message = message.Replace(ColorSignal + 99, c.IRCtoMC(99).Replace('&', '%'));
+		
             for (byte i = 10; i < 16; i++)
                 message = message.Replace(ColorSignal + i, c.IRCtoMC(i).Replace('&', '%'));
             for (byte i = 0; i < 10; i++)
