@@ -108,8 +108,8 @@ namespace MCForge
                 case pink: return 13;
                 case yellow: return 8;
                 case white: return 0;
-                case irc: return 1;
-                default: return 1;
+                case irc: return 99;
+                default: return 99;
             }
         }
         public static string IRCtoMC(byte str)
@@ -132,6 +132,7 @@ namespace MCForge
                 case 13: return pink;
                 case 14: return gray;
                 case 15: return silver;
+                case 99: return white;
                 default: return "";
             }
         }
