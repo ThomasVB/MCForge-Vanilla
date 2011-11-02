@@ -187,7 +187,7 @@ namespace MCForge
             for (byte i = 10; i < 16; i++)
                 message = message.Replace(ColorSignal + i, c.IRCtoMC(i).Replace('&', '%'));
             for (byte i = 0; i < 10; i++)
-                message = message.Replace(ColorSignal + i, c.IRCtoMC(i).Replace('&', '%'));
+                message = message.Replace(ColorSignal + "0" + i, c.IRCtoMC(i).Replace('&', '%'));
 
             message = message.MCCharFilter();
             if (Player.MessageHasBadColorCodes(null, message))
